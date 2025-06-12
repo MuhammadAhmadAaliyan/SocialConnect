@@ -10,16 +10,18 @@ import {
   Platform,
   ScrollView,
   ActivityIndicator,
+  Alert,
 } from "react-native";
 import * as SplashScreen from "expo-splash-screen";
 import { useFonts } from "expo-font";
 import { Formik } from "formik";
 import * as Yup from "yup";
 import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 SplashScreen.preventAutoHideAsync();
 
-const LoginScreen = ({ navigation }) => {
+const LoginScreen = ({ navigation }: any) => {
   const [loaded, error] = useFonts({
     DancingScriptBold: require("../assets/fonts/DancingScript-Bold.ttf"),
     PoppinsMedium: require("../assets/fonts/Poppins-Medium.ttf"),
@@ -28,6 +30,7 @@ const LoginScreen = ({ navigation }) => {
   });
   const [isPasswordVisible, setPasswordVisible] = React.useState(false);
   const [isButtonPressed, setButtonPressed] = React.useState(false);
+  const [incorrectUserCredentials, setIncorrectUserCredentials] = React.useState("");
 
   //MOCK_API_URL
   const MOCK_API_URL =
@@ -71,13 +74,14 @@ const LoginScreen = ({ navigation }) => {
 
       if (foundUser) {
         console.log("Login Successful.");
-        setPasswordVisible(false);
+        setButtonPressed(false);
+        await AsyncStorage.setItem('@userLoggedIn', "true");
         navigation.reset({
           index: 0,
-          routes: [{ name: "HomeScreen" }],
+          routes: [{ name: "Tabs" }],
         });
       } else {
-        console.log("Invalid email or password.");
+        setIncorrectUserCredentials("Incorrect email or password");
         setButtonPressed(false);
       }
     } catch (e) {
@@ -100,11 +104,13 @@ const LoginScreen = ({ navigation }) => {
             <Text style={styles.welcome}>Welcome</Text>
             <Text style={styles.loginText}>Login to Continue</Text>
           </View>
+          <Text style={styles.incorrectCrendentials}>{incorrectUserCredentials}</Text>
           <Formik
             initialValues={{ email: "", password: "" }}
             validationSchema={validationSchema}
             onSubmit={(values) => {
               handleLogin(values.email, values.password);
+              setButtonPressed(true);
             }}
           >
             {({
@@ -173,7 +179,6 @@ const LoginScreen = ({ navigation }) => {
                   ]}
                   onPress={() => {
                     handleSubmit();
-                    setButtonPressed(true);
                   }}
                   disabled={isButtonPressed}
                 >
@@ -301,4 +306,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
   },
+  incorrectCrendentials:{
+    fontSize: 18,
+    fontFamily: 'PoppinsMedium',
+    color: 'red',
+    textAlign: 'center',
+    paddingBottom: 8
+  }
 });

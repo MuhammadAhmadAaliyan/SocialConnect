@@ -1,7 +1,7 @@
 import { View, Text, Pressable} from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const HomeScreen = () => {
+const SettingScreen = () => {
 
     let handleButton = async() => {
         try{
@@ -17,4 +17,4 @@ const HomeScreen = () => {
     )
 }
 
-export default HomeScreen;
+export default SettingScreen;

@@ -9,16 +9,19 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Alert,
+  ActivityIndicator,
 } from "react-native";
 import * as SplashScreen from "expo-splash-screen";
 import { useFonts } from "expo-font";
 import { Formik } from "formik";
 import * as Yup from "yup";
 import { Ionicons } from "@expo/vector-icons";
+import { useRoute } from "@react-navigation/native";
 
 SplashScreen.preventAutoHideAsync();
 
-const ResetPasswordScreen = () => {
+const ResetPasswordScreen = ({ navigation }: any) => {
   const [loaded, error] = useFonts({
     DancingScriptBold: require("../assets/fonts/DancingScript-Bold.ttf"),
     PoppinsMedium: require("../assets/fonts/Poppins-Medium.ttf"),
@@ -28,6 +31,8 @@ const ResetPasswordScreen = () => {
   const [isPasswordVisible, setPasswordVisible] = React.useState(false);
   const [isConfirmPasswordVisible, setConfirmPasswordVisible] =
     React.useState(false);
+  const [isButtonPressed, setButtonPressed] = React.useState(false);
+  const route = useRoute();
 
   //Input Validation Schema.
   const validationSchema = Yup.object().shape({
@@ -39,6 +44,12 @@ const ResetPasswordScreen = () => {
       .required("Password is Required"),
   });
 
+  //MOCK_API_URL
+  const MOCK_API_URL =
+    "https://68482065ec44b9f3493fba2f.mockapi.io/api/v1/users";
+
+  const { userId } = route.params as { userId: string };
+
   React.useEffect(() => {
     if (loaded || error) {
       SplashScreen.hideAsync();
@@ -48,6 +59,54 @@ const ResetPasswordScreen = () => {
   if (!loaded && !error) {
     return null;
   }
+
+  //Reset password function.
+  let handleReset = async (newPassword: string) => {
+    try {
+      if (!userId) {
+        console.log("Error: userId is undefined.");
+        Alert.alert("Something went wrong", "User ID not found.");
+        return;
+      }
+
+      const url = `${MOCK_API_URL}/${userId}`;
+      console.log("PATCH URL:", url);
+
+      const response = await fetch(url, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ password: newPassword }),
+      });
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to update password. Status: ${response.status}`,
+        );
+      }
+
+      console.log("Password reset Successfully");
+
+      Alert.alert(
+        "Reset Successful",
+        "Please log in with your new credentials",
+      );
+
+      navigation.reset({
+        index: 0,
+        routes: [{ name: "LoginScreen" }],
+      });
+      setButtonPressed(false);
+    } catch (e) {
+      console.log("An error occurred while resetting password");
+      console.log(e);
+      Alert.alert(
+        "Reset Failed",
+        "Something went wrong. Please try again later.",
+      );
+    }
+  };
 
   return (
     <KeyboardAvoidingView
@@ -66,10 +125,18 @@ const ResetPasswordScreen = () => {
             initialValues={{ password: "", confirmPassword: "" }}
             validationSchema={validationSchema}
             onSubmit={(values) => {
-              console.log("Form Values: ", values);
+              handleReset(values.password);
+              setButtonPressed(true);
             }}
           >
-            {({ handleChange, handleBlur, values, errors, touched }) => (
+            {({
+              handleChange,
+              handleBlur,
+              handleSubmit,
+              values,
+              errors,
+              touched,
+            }) => (
               <>
                 <View style={{ marginBottom: "10%" }}>
                   <View style={styles.passwordInput}>
@@ -129,8 +196,22 @@ const ResetPasswordScreen = () => {
                     <Text style={styles.error}>{errors.confirmPassword}</Text>
                   )}
                 </View>
-                <Pressable style={styles.doneButton}>
-                  <Text style={styles.doneButtonText}>Done</Text>
+                <Pressable
+                  style={[
+                    styles.doneButton,
+                    isButtonPressed && {
+                      borderColor: "#CCCCCC",
+                      backgroundColor: "#CCCCCC",
+                    },
+                  ]}
+                  onPress={() => handleSubmit()}
+                  disabled={isButtonPressed}
+                >
+                  {isButtonPressed ? (
+                    <ActivityIndicator color={"#ffffff"} size={28} />
+                  ) : (
+                    <Text style={styles.doneButtonText}>Done</Text>
+                  )}
                 </Pressable>
               </>
             )}

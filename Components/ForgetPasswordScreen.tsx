@@ -9,6 +9,8 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Alert,
+  ActivityIndicator,
 } from "react-native";
 import * as SplashScreen from "expo-splash-screen";
 import { useFonts } from "expo-font";
@@ -17,13 +19,14 @@ import * as Yup from "yup";
 
 SplashScreen.preventAutoHideAsync();
 
-const ForgetPasswordScreen = ({navigation}: any) => {
+const ForgetPasswordScreen = ({ navigation }: any) => {
   const [loaded, error] = useFonts({
     DancingScriptBold: require("../assets/fonts/DancingScript-Bold.ttf"),
     PoppinsMedium: require("../assets/fonts/Poppins-Medium.ttf"),
     PoppinsRegular: require("../assets/fonts/Poppins-Regular.ttf"),
     PoppinsBold: require("../assets/fonts/Poppins-Bold.ttf"),
   });
+  const [isButtonPressed, setButtonPressed] = React.useState(false);
 
   //Input Validation Schema.
   const validationSchema = Yup.object().shape({
@@ -31,6 +34,10 @@ const ForgetPasswordScreen = ({navigation}: any) => {
       .email("Invalid Email Address")
       .required("Email is Required"),
   });
+
+  //MOCK_API_URL
+  const MOCK_API_URL =
+    "https://68482065ec44b9f3493fba2f.mockapi.io/api/v1/users";
 
   React.useEffect(() => {
     if (loaded || error) {
@@ -41,6 +48,29 @@ const ForgetPasswordScreen = ({navigation}: any) => {
   if (!loaded && !error) {
     return null;
   }
+
+  //Email verification function
+  let handleVerification = async (email: string) => {
+    try {
+      const response = await fetch(MOCK_API_URL);
+
+      const users = await response.json();
+
+      let userFound = users.find((user: any) => user.email === email);
+
+      if (userFound) {
+        navigation.navigate("ResetPasswordScreen", { userId: userFound.id });
+        setButtonPressed(false);
+        console.log(userFound.id)
+      } else {
+        Alert.alert("Sorry there is no account registered on this email.");
+        setButtonPressed(false);
+      }
+    } catch (e) {
+      console.log("An error occurred while verification.");
+      console.log(e);
+    }
+  };
 
   return (
     <KeyboardAvoidingView
@@ -60,10 +90,18 @@ const ForgetPasswordScreen = ({navigation}: any) => {
             initialValues={{ email: "" }}
             validationSchema={validationSchema}
             onSubmit={(values) => {
-              console.log("Form Values: ", values);
+              handleVerification(values.email);
+              setButtonPressed(true);
             }}
           >
-            {({ handleChange, handleBlur, values, errors, touched }) => (
+            {({
+              handleChange,
+              handleBlur,
+              handleSubmit,
+              values,
+              errors,
+              touched,
+            }) => (
               <>
                 <View style={styles.inputContainer}>
                   <TextInput
@@ -78,8 +116,22 @@ const ForgetPasswordScreen = ({navigation}: any) => {
                     <Text style={styles.error}>{errors.email}</Text>
                   )}
                 </View>
-                <Pressable style={styles.verifyButton} onPress={() => navigation.navigate('ResetPasswordScreen')}>
-                  <Text style={styles.verifyButtonText}>Verify</Text>
+                <Pressable
+                  style={[
+                    styles.verifyButton,
+                    isButtonPressed && {
+                      borderColor: "#CCCCCC",
+                      backgroundColor: "#CCCCCC",
+                    },
+                  ]}
+                  onPress={() => handleSubmit()}
+                  disabled={isButtonPressed}
+                >
+                  {isButtonPressed ? (
+                    <ActivityIndicator color={"#ffffff"} size={28} />
+                  ) : (
+                    <Text style={styles.verifyButtonText}>Verify</Text>
+                  )}
                 </Pressable>
               </>
             )}

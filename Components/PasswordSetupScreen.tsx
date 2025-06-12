@@ -10,7 +10,7 @@ import {
   Platform,
   ScrollView,
   Alert,
-  ActivityIndicator
+  ActivityIndicator,
 } from "react-native";
 import * as SplashScreen from "expo-splash-screen";
 import { useFonts } from "expo-font";
@@ -21,7 +21,7 @@ import { useRoute } from "@react-navigation/native";
 
 SplashScreen.preventAutoHideAsync();
 
-const PasswordSetupScreen = ({navigation}: any) => {
+const PasswordSetupScreen = ({ navigation }: any) => {
   const [loaded, error] = useFonts({
     DancingScriptBold: require("../assets/fonts/DancingScript-Bold.ttf"),
     PoppinsMedium: require("../assets/fonts/Poppins-Medium.ttf"),
@@ -104,13 +104,13 @@ const PasswordSetupScreen = ({navigation}: any) => {
     } catch (e) {
       console.log("Signup Error occur!!");
       console.log(e);
-    }finally{
+    } finally {
       setButtonPressed(false);
       Alert.alert("Sign up Successful. Please Log in with your credentials.");
       navigation.reset({
         index: 0,
-        routes: [{name: 'LoginScreen'}]
-      })
+        routes: [{ name: "LoginScreen" }],
+      });
     }
   };
 
@@ -132,6 +132,7 @@ const PasswordSetupScreen = ({navigation}: any) => {
             validationSchema={validationSchema}
             onSubmit={(values) => {
               handleSignup(values.password);
+              setButtonPressed(true);
             }}
           >
             {({
@@ -202,19 +203,21 @@ const PasswordSetupScreen = ({navigation}: any) => {
                   )}
                 </View>
                 <Pressable
-                  style={[styles.doneButton, isButtonPressed&&{borderColor:'#CCCCCC', backgroundColor: '#CCCCCC'}]}
-                  onPress={() => {
-                      handleSubmit()
-                      setButtonPressed(true);
-                    }}
-                    disabled={isButtonPressed}
+                  style={[
+                    styles.doneButton,
+                    isButtonPressed && {
+                      borderColor: "#CCCCCC",
+                      backgroundColor: "#CCCCCC",
+                    },
+                  ]}
+                  onPress={() => handleSubmit()}
+                  disabled={isButtonPressed}
                 >
-                  {isButtonPressed? (
-                    <ActivityIndicator color={'#ffffff'} size={28}/>
-                  ):
-                  (
-                  <Text style={styles.doneButtonText}>Done</Text>
-                )}
+                  {isButtonPressed ? (
+                    <ActivityIndicator color={"#ffffff"} size={28} />
+                  ) : (
+                    <Text style={styles.doneButtonText}>Done</Text>
+                  )}
                 </Pressable>
               </>
             )}
