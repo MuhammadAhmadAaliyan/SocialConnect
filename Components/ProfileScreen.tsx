@@ -159,6 +159,8 @@ const ProfileScreen = ({ navigation }: any) => {
   let saveEdit = async (newName: string, newBio: string) => {
     try {
       if (modalType === "Name") {
+        setuserName(newName);
+
         const MOCK_API_URL =
           "https://68482065ec44b9f3493fba2f.mockapi.io/api/v1/users";
 
@@ -194,7 +196,6 @@ const ProfileScreen = ({ navigation }: any) => {
           );
         }
 
-        setuserName(newName);
         await AsyncStorage.setItem("@userName", newName);
       } else {
         await AsyncStorage.setItem("@bio", newBio);
@@ -249,6 +250,7 @@ const ProfileScreen = ({ navigation }: any) => {
           <MaterialIcons
             name={"edit"}
             size={20}
+            style={{alignSelf: 'center'}}
             onPress={() => {
               setInfoModalVisible(true);
               setModalType("Name");
@@ -256,20 +258,11 @@ const ProfileScreen = ({ navigation }: any) => {
           />
         </View>
         <Text style={{ fontSize: 22, fontFamily: "PoppinsMedium" }}>Bio:</Text>
-        <View
-          style={{
-            flexDirection: "row",
-            borderWidth: 1,
-            borderColor: "#4F46E5",
-            borderRadius: 15,
-            marginVertical: "6%",
-            padding: 10,
-            alignItems: "flex-start", // So top aligns for multiline text
-            justifyContent: "space-between",
-            flexWrap: "nowrap",
-          }}
-        >
-          <Text style={[styles.bioInfo, !bio && { color: "#D3D3D3" }]} numberOfLines={0}>
+        <View style={styles.infoContainer}>
+          <Text
+            style={[styles.info, !bio && { color: "#D3D3D3" }]}
+            numberOfLines={0}
+          >
             {bio ? bio : "Add your Bio"}
           </Text>
           <MaterialIcons
@@ -279,7 +272,7 @@ const ProfileScreen = ({ navigation }: any) => {
               setInfoModalVisible(true);
               setModalType("Bio");
             }}
-            style={{alignSelf:'center'}}
+            style={{ alignSelf: "center" }}
           />
         </View>
       </View>
@@ -393,7 +386,9 @@ const ProfileScreen = ({ navigation }: any) => {
                 {modalType == "Bio" && (
                   <View style={styles.inputContainer}>
                     <TextInput
+                      multiline
                       value={values.bio}
+                      returnKeyType={"default"}
                       placeholder="Add your Bio"
                       onChangeText={handleChange("bio")}
                       onBlur={handleBlur("bio")}
@@ -506,25 +501,21 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     borderWidth: 1,
     borderColor: "#4F46E5",
-    height: 50,
     borderRadius: 15,
     marginVertical: "6%",
-    justifyContent: "space-between",
-    alignItems: "center",
     padding: 10,
+    alignItems: "flex-start", // So top aligns for multiline text
+    justifyContent: "space-between",
+    flexWrap: "nowrap",
   },
   info: {
     fontSize: 20,
     fontFamily: "PoppinsRegular",
-  },
-  bioInfo: {
-    fontSize: 20,
-    fontFamily: "PoppinsRegular",
-    flexShrink: 1, // Allow to shrink if needed
-    flexGrow: 1, // Allow to take available space
-    flex: 1, // Fill available horizontal space
-    flexWrap: "wrap", // Wrap text
-    paddingRight: 10
+    flexShrink: 1,
+    flexGrow: 1,
+    flex: 1, 
+    flexWrap: "wrap", 
+    paddingRight: 10,
   },
   modal: {
     justifyContent: "flex-end",

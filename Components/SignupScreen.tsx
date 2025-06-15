@@ -8,7 +8,7 @@ import {
   Pressable,
   KeyboardAvoidingView,
   Platform,
-  ScrollView
+  ScrollView,
 } from "react-native";
 import * as SplashScreen from "expo-splash-screen";
 import { useFonts } from "expo-font";
@@ -29,12 +29,11 @@ const SignupScreen = ({ navigation }: any) => {
   //Input Validation Schema.
   const validationSchema = Yup.object().shape({
     email: Yup.string()
-          .matches(
-      /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-      "Invalid Email Address"
-    )
+      .matches(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Invalid Email Address")
       .required("Email is Required"),
-    name: Yup.string().required("Name is Required"),
+    name: Yup.string()
+      .required("Name is Required")
+      .max(30, "Name can't exceed 30 characters."),
   });
 
   React.useEffect(() => {
@@ -43,20 +42,20 @@ const SignupScreen = ({ navigation }: any) => {
     }
   }, [loaded, error]);
 
-//Button handle funtion.
-let handleButton = async (uName: string, uEmail: string) => {
-  try{
-    await AsyncStorage.setItem('@userName', uName);
-    navigation.navigate('PasswordSetupScreen', {
-    name: uName,
-    email: uEmail
-  });
-  console.log(`Email: ${uEmail}  Name: ${uName}`);
-  }catch(e){
-    console.log("An occurred while saving name");
-    console.log(e);
-  }
-}
+  //Button handle funtion.
+  let handleButton = async (uName: string, uEmail: string) => {
+    try {
+      await AsyncStorage.setItem("@userName", uName);
+      navigation.navigate("PasswordSetupScreen", {
+        name: uName,
+        email: uEmail,
+      });
+      console.log(`Email: ${uEmail}  Name: ${uName}`);
+    } catch (e) {
+      console.log("An occurred while saving name");
+      console.log(e);
+    }
+  };
 
   if (!loaded && !error) {
     return null;
@@ -83,7 +82,14 @@ let handleButton = async (uName: string, uEmail: string) => {
               handleButton(values.name, values.email);
             }}
           >
-            {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
+            {({
+              handleChange,
+              handleBlur,
+              handleSubmit,
+              values,
+              errors,
+              touched,
+            }) => (
               <>
                 <View style={styles.inputContainer}>
                   <TextInput
@@ -93,10 +99,21 @@ let handleButton = async (uName: string, uEmail: string) => {
                     onChangeText={handleChange("name")}
                     onBlur={handleBlur("name")}
                     value={values.name}
+                    maxLength={30}
                   />
-                  {touched.name && errors.name && (
-                    <Text style={styles.error}>{errors.name}</Text>
-                  )}
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <Text style={styles.inputLength}>
+                      {values.name?.length}/30
+                    </Text>
+                    {touched.name && errors.name && (
+                      <Text style={styles.error}>{errors.name}</Text>
+                    )}
+                  </View>
                 </View>
                 <View style={styles.inputContainer}>
                   <TextInput
@@ -124,10 +141,14 @@ let handleButton = async (uName: string, uEmail: string) => {
             <Text style={{ fontSize: 18, fontFamily: "PoppinsRegular" }}>
               Already have a account?
             </Text>
-            <Pressable onPress={() => navigation.reset({
-              index: 0,
-              routes: [{name: 'LoginScreen'}]
-            })}>
+            <Pressable
+              onPress={() =>
+                navigation.reset({
+                  index: 0,
+                  routes: [{ name: "LoginScreen" }],
+                })
+              }
+            >
               <Text
                 style={{
                   fontSize: 18,
@@ -196,6 +217,11 @@ const styles = StyleSheet.create({
     color: "red",
     fontFamily: "PoppinsRegular",
     fontSize: 12,
+  },
+    inputLength: {
+    position: "absolute",
+    left: "90%",
+    fontFamily: "PoppinsRegular",
   },
   nextButton: {
     borderWidth: 1,
