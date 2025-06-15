@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   Alert,
   TextInput,
+  ScrollView,
 } from "react-native";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
@@ -226,6 +227,7 @@ const ProfileScreen = ({ navigation }: any) => {
         )}
       </View>
       <View style={{ borderBottomWidth: 1, borderColor: "#C0C0C0" }} />
+      <ScrollView style={{flex: 1}} showsVerticalScrollIndicator={false}>
       <View style={styles.profileArea}>
         <Text style={styles.profileText}>Profile</Text>
         <View style={styles.profileImageContainer}>
@@ -276,6 +278,7 @@ const ProfileScreen = ({ navigation }: any) => {
           />
         </View>
       </View>
+      </ScrollView>
       <Modal
         isVisible={pModalVisible}
         onBackdropPress={() => setPModalVisible(false)}
