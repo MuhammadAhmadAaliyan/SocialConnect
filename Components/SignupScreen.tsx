@@ -14,6 +14,7 @@ import * as SplashScreen from "expo-splash-screen";
 import { useFonts } from "expo-font";
 import { Formik } from "formik";
 import * as Yup from "yup";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -43,12 +44,18 @@ const SignupScreen = ({ navigation }: any) => {
   }, [loaded, error]);
 
 //Button handle funtion.
-let handleButton = (uName: string, uEmail: string) => {
-  navigation.navigate('PasswordSetupScreen', {
+let handleButton = async (uName: string, uEmail: string) => {
+  try{
+    await AsyncStorage.setItem('@userName', uName);
+    navigation.navigate('PasswordSetupScreen', {
     name: uName,
     email: uEmail
   });
   console.log(`Email: ${uEmail}  Name: ${uName}`);
+  }catch(e){
+    console.log("An occurred while saving name");
+    console.log(e);
+  }
 }
 
   if (!loaded && !error) {
@@ -152,7 +159,6 @@ const styles = StyleSheet.create({
   logoText: {
     fontFamily: "DancingScriptBold",
     fontSize: 42,
-    gap: 10,
     letterSpacing: 6,
     textAlign: "center",
   },

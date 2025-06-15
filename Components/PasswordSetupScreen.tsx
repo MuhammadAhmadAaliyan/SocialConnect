@@ -101,16 +101,16 @@ const PasswordSetupScreen = ({ navigation }: any) => {
       const newUser = await response.json();
       console.log("Signup Successful.");
       console.log("New user data", newUser);
-    } catch (e) {
-      console.log("Signup Error occur!!");
-      console.log(e);
-    } finally {
+
+      Alert.alert("Sign up Successful.", "Please Log in with your credentials.");
       setButtonPressed(false);
-      Alert.alert("Sign up Successful. Please Log in with your credentials.");
       navigation.reset({
         index: 0,
         routes: [{ name: "LoginScreen" }],
       });
+    } catch (e) {
+      console.log("Signup Error occur!!");
+      console.log(e);
     }
   };
 
@@ -242,7 +242,6 @@ const styles = StyleSheet.create({
   logoText: {
     fontFamily: "DancingScriptBold",
     fontSize: 42,
-    gap: 10,
     letterSpacing: 6,
     textAlign: "center",
   },

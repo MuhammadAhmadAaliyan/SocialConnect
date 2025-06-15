@@ -12,6 +12,7 @@ import PasswordSetupScreen from "./Components/PasswordSetupScreen";
 import ForgetPasswordScreen from "./Components/ForgetPasswordScreen";
 import ResetPasswordScreen from "./Components/ResetPasswordScreen";
 import Tabs from './Components/Tabs';
+import ProfileScreen from './Components/ProfileScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -49,7 +50,10 @@ export default function App() {
     <NavigationContainer>
       <Stack.Navigator screenOptions={{headerShown: false}}>
         {isLoggedIn? (
+          <>
           <Stack.Screen name="Tabs" component={Tabs} />
+          <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
+          </>
         ): (
           <>
         <Stack.Screen name="LoginScreen" component={LoginScreen} />
@@ -58,6 +62,7 @@ export default function App() {
         <Stack.Screen name="ForgetPasswordScreen" component={ForgetPasswordScreen} />
         <Stack.Screen name="ResetPasswordScreen" component={ResetPasswordScreen} />
         <Stack.Screen name="Tabs" component={Tabs} />
+        <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
         </>
         )}
       </Stack.Navigator>

@@ -63,7 +63,7 @@ const ForgetPasswordScreen = ({ navigation }: any) => {
         setButtonPressed(false);
         console.log(userFound.id)
       } else {
-        Alert.alert("Sorry there is no account registered on this email.");
+        Alert.alert("Incorrect Email", "Sorry there is no account registered on this email.");
         setButtonPressed(false);
       }
     } catch (e) {
@@ -156,7 +156,6 @@ const styles = StyleSheet.create({
   logoText: {
     fontFamily: "DancingScriptBold",
     fontSize: 42,
-    gap: 10,
     letterSpacing: 6,
     textAlign: "center",
   },

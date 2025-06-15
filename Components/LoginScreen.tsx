@@ -227,7 +227,6 @@ const styles = StyleSheet.create({
   logoText: {
     fontFamily: "DancingScriptBold",
     fontSize: 42,
-    gap: 10,
     letterSpacing: 6,
     textAlign: "center",
   },
