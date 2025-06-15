@@ -250,7 +250,7 @@ const ProfileScreen = ({ navigation }: any) => {
           <MaterialIcons
             name={"edit"}
             size={20}
-            style={{alignSelf: 'center'}}
+            style={{ alignSelf: "center" }}
             onPress={() => {
               setInfoModalVisible(true);
               setModalType("Name");
@@ -513,8 +513,8 @@ const styles = StyleSheet.create({
     fontFamily: "PoppinsRegular",
     flexShrink: 1,
     flexGrow: 1,
-    flex: 1, 
-    flexWrap: "wrap", 
+    flex: 1,
+    flexWrap: "wrap",
     paddingRight: 10,
   },
   modal: {
@@ -526,8 +526,17 @@ const styles = StyleSheet.create({
     padding: 20,
     borderWidth: 1,
     borderColor: "#F6F6F6",
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    borderTopLeftRadius: 35,
+    borderTopRightRadius: 35,
+
+    //Shadow for iOS
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+
+    // Shadow for Android
+    elevation: 5,
   },
   handleBar: {
     width: 50,
