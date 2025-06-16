@@ -226,58 +226,75 @@ const ProfileScreen = ({ navigation }: any) => {
           />
         )}
       </View>
-      <View style={{ borderBottomWidth: 1, borderColor: "#C0C0C0" }} />
-      <ScrollView style={{flex: 1}} showsVerticalScrollIndicator={false}>
-      <View style={styles.profileArea}>
-        <Text style={styles.profileText}>Profile</Text>
-        <View style={styles.profileImageContainer}>
-          {profileImage ? (
-            <Image source={{ uri: profileImage }} style={styles.profileImage} />
-          ) : (
-            <Image
-              source={require("../assets/Default Avatar.jpg")}
-              style={styles.profileImage}
-            />
-          )}
-          <Pressable
-            style={styles.editButton}
-            onPress={() => setPModalVisible(true)}
-          >
-            <MaterialIcons name={"edit"} size={20} color={"#ffffff"} />
-          </Pressable>
-        </View>
-        <Text style={{ fontSize: 22, fontFamily: "PoppinsMedium" }}>Name:</Text>
-        <View style={styles.infoContainer}>
-          <Text style={styles.info}>{userName}</Text>
-          <MaterialIcons
-            name={"edit"}
-            size={20}
-            style={{ alignSelf: "center" }}
-            onPress={() => {
-              setInfoModalVisible(true);
-              setModalType("Name");
-            }}
-          />
-        </View>
-        <Text style={{ fontSize: 22, fontFamily: "PoppinsMedium" }}>Bio:</Text>
-        <View style={styles.infoContainer}>
-          <Text
-            style={[styles.info, !bio && { color: "#D3D3D3" }]}
-            numberOfLines={0}
-          >
-            {bio ? bio : "Add your Bio"}
+      <View
+        style={{
+          height: 1,
+          backgroundColor: "#E0E0E0",
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 1 },
+          shadowOpacity: 0.08,
+          shadowRadius: 1,
+          elevation: 1,
+        }}
+      />
+      <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
+        <View style={styles.profileArea}>
+          <Text style={styles.profileText}>Profile</Text>
+          <View style={styles.profileImageContainer}>
+            {profileImage ? (
+              <Image
+                source={{ uri: profileImage }}
+                style={styles.profileImage}
+              />
+            ) : (
+              <Image
+                source={require("../assets/Default Avatar.jpg")}
+                style={styles.profileImage}
+              />
+            )}
+            <Pressable
+              style={styles.editButton}
+              onPress={() => setPModalVisible(true)}
+            >
+              <MaterialIcons name={"edit"} size={20} color={"#ffffff"} />
+            </Pressable>
+          </View>
+          <Text style={{ fontSize: 22, fontFamily: "PoppinsMedium" }}>
+            Name:
           </Text>
-          <MaterialIcons
-            name={"edit"}
-            size={20}
-            onPress={() => {
-              setInfoModalVisible(true);
-              setModalType("Bio");
-            }}
-            style={{ alignSelf: "center" }}
-          />
+          <View style={styles.infoContainer}>
+            <Text style={styles.info}>{userName}</Text>
+            <MaterialIcons
+              name={"edit"}
+              size={20}
+              style={{ alignSelf: "center" }}
+              onPress={() => {
+                setInfoModalVisible(true);
+                setModalType("Name");
+              }}
+            />
+          </View>
+          <Text style={{ fontSize: 22, fontFamily: "PoppinsMedium" }}>
+            Bio:
+          </Text>
+          <View style={styles.infoContainer}>
+            <Text
+              style={[styles.info, !bio && { color: "#D3D3D3" }]}
+              numberOfLines={0}
+            >
+              {bio ? bio : "Add your Bio"}
+            </Text>
+            <MaterialIcons
+              name={"edit"}
+              size={20}
+              onPress={() => {
+                setInfoModalVisible(true);
+                setModalType("Bio");
+              }}
+              style={{ alignSelf: "center" }}
+            />
+          </View>
         </View>
-      </View>
       </ScrollView>
       <Modal
         isVisible={pModalVisible}

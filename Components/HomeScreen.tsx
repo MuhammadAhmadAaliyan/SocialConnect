@@ -32,9 +32,9 @@ const HomeScreen = ({ navigation }: any) => {
     let loadData = async () => {
       try {
         const profileImage = await AsyncStorage.getItem("@profileImage");
-        if (profileImage){
+        if (profileImage) {
           setProfileImage(profileImage);
-        }else{
+        } else {
           setProfileImage("");
         }
       } catch (e) {
@@ -65,6 +65,17 @@ const HomeScreen = ({ navigation }: any) => {
           )}
         </Pressable>
       </View>
+      <View
+        style={{
+          height: 1,
+          backgroundColor: "#E0E0E0",
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 1 },
+          shadowOpacity: 0.08,
+          shadowRadius: 1,
+          elevation: 1,
+        }}
+      />
     </SafeAreaView>
   );
 };
