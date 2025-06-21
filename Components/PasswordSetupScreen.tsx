@@ -45,8 +45,8 @@ const PasswordSetupScreen = ({ navigation }: any) => {
   });
 
   //MOCK_API_URL
-  const MOCK_API_URL =
-    "https://68482065ec44b9f3493fba2f.mockapi.io/api/v1/users";
+  const MOCK_API_AUTH_URL =
+    "https://socialconnect-backend-production.up.railway.app/signup";
 
   React.useEffect(() => {
     if (loaded || error) {
@@ -63,53 +63,38 @@ const PasswordSetupScreen = ({ navigation }: any) => {
   //handle Signup function.
   let handleSignup = async (password: string) => {
     try {
-      const existingUsersResponse = await fetch(MOCK_API_URL);
-      if (!existingUsersResponse.ok) {
-        throw new Error(
-          "Could not fetch existing users to check for duplicates.",
-        );
-      }
-
-      const existingUsers = await existingUsersResponse.json();
-
-      const existingEmail = existingUsers.some(
-        (user: any) => user.email == email,
-      );
-      if (existingEmail) {
-        Alert.alert(
-          "This email address is already registered. Please use other email address.",
-        );
-        return;
-      }
-
-      const response = await fetch(MOCK_API_URL, {
-        method: "POST",
+      const newUser = {
+        id: Date.now().toString(),
+        name: name,
+        email: email,
+        password: password
+      };
+      const response = await fetch(MOCK_API_AUTH_URL,{
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "application/json"
         },
-        body: JSON.stringify({
-          userName: name,
-          email: email,
-          password: password,
-        }),
+        body: JSON.stringify(newUser)
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to create account on MockAPI.io.");
+      if(response.status == 400){
+        Alert.alert("Alert!", "The email you entered is already registered. Please use another email.");
+        setButtonPressed(false);
+        return;
+      }else if(response.status == 201){
+        Alert.alert("Success", "Signup Successful. Please use your credentials to login.");
+        setButtonPressed(false);
+        navigation.reset({
+          index: 0,
+          routes: [{ name: "LoginScreen" }],
+        });
+
+      }else{
+        console.log("Error: ", response.status);
+        setButtonPressed(false);
       }
-
-      const newUser = await response.json();
-      console.log("Signup Successful.");
-      console.log("New user data", newUser);
-
-      Alert.alert("Sign up Successful.", "Please Log in with your credentials.");
-      setButtonPressed(false);
-      navigation.reset({
-        index: 0,
-        routes: [{ name: "LoginScreen" }],
-      });
     } catch (e) {
-      console.log("Signup Error occur!!");
+      console.log("Signup Error.");
       console.log(e);
     }
   };

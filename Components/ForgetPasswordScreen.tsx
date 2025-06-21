@@ -36,8 +36,8 @@ const ForgetPasswordScreen = ({ navigation }: any) => {
   });
 
   //MOCK_API_URL
-  const MOCK_API_URL =
-    "https://68482065ec44b9f3493fba2f.mockapi.io/api/v1/users";
+  const MOCK_API_AUTH_URL =
+    "https://socialconnect-backend-production.up.railway.app/user";
 
   React.useEffect(() => {
     if (loaded || error) {
@@ -52,18 +52,23 @@ const ForgetPasswordScreen = ({ navigation }: any) => {
   //Email verification function
   let handleVerification = async (email: string) => {
     try {
-      const response = await fetch(MOCK_API_URL);
+      const response = await fetch(`${MOCK_API_AUTH_URL}/${email}`);
 
-      const users = await response.json();
-
-      let userFound = users.find((user: any) => user.email === email);
-
-      if (userFound) {
-        navigation.navigate("ResetPasswordScreen", { userId: userFound.id });
+      if (response.status == 404) {
+        Alert.alert("Sorry!!", "Incorrect Email. No user found.");
         setButtonPressed(false);
-        console.log(userFound.id)
+        return;
+      }
+
+      if (response.ok) {
+        const data = await response.json();
+        const userIndex = data.userIndex;
+
+        setButtonPressed(false);
+        navigation.navigate("ResetPasswordScreen", { userIndex: userIndex });
+        console.log(userIndex)
       } else {
-        Alert.alert("Incorrect Email", "Sorry there is no account registered on this email.");
+        console.log(response.status);
         setButtonPressed(false);
       }
     } catch (e) {

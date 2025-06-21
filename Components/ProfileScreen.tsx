@@ -20,6 +20,7 @@ import * as ImagePicker from "expo-image-picker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Formik } from "formik";
 import * as Yup from "yup";
+import { useAuth } from "../contexts/AuthContext";
 
 const ProfileScreen = ({ navigation }: any) => {
   const [loaded, error] = useFonts({
@@ -34,6 +35,11 @@ const ProfileScreen = ({ navigation }: any) => {
   const [modalType, setModalType] = React.useState("");
   const [userName, setuserName] = React.useState<string>("");
   const [bio, setBio] = React.useState<string>("");
+  const auth = useAuth();
+
+  //MOCK API URL
+  const MOCK_API_AUTH_URL =
+    "https://socialconnect-backend-production.up.railway.app/user";
 
   React.useEffect(() => {
     if (loaded || error) {
@@ -49,29 +55,97 @@ const ProfileScreen = ({ navigation }: any) => {
     bio: Yup.string().max(100, "Bio can't exceed 100 characters."),
   });
 
-  //Load data from memory.
+  //Save data into  memory.
   React.useEffect(() => {
-    let loadData = async () => {
+    let saveData = async () => {
       try {
-        const imageUri = await AsyncStorage.getItem("@profileImage");
-        const userName = await AsyncStorage.getItem("@userName");
-        const bio = await AsyncStorage.getItem("@bio");
+        if (auth.user && auth.user.user) {
+          const userName = auth.user.user.name;
+          const bio = auth.user.user.bio;
+          const profileImage = auth.user.user.avatar;
+          const userId = auth.user.user.id;
 
-        if (imageUri) setProfileImage(imageUri);
-        if (userName) setuserName(userName);
-        if (bio) setBio(bio);
+          if (userName) {
+            setuserName(userName);
+            await AsyncStorage.setItem("@userName", userName);
+          }
+          if (bio) {
+            setBio(bio);
+            await AsyncStorage.setItem("@bio", bio);
+          }
+          if (profileImage) {
+            setProfileImage(profileImage);
+            await AsyncStorage.setItem("@profileImage", profileImage);
+          }
+          if (userId) {
+            await AsyncStorage.setItem("@userId", userId);
+            console.log(userId);
+          }
+        }
       } catch (e) {
-        console.log("An error occurred while loading data.");
-        console.log(e);
+        console.log("An error occurred while saving data");
       }
     };
 
+    saveData();
+  }, [auth.user]);
+
+  //Load data from memory.
+  let loadData = async () => {
+    try {
+      const userName = await AsyncStorage.getItem("@userName");
+      const bio = await AsyncStorage.getItem("@bio");
+      const profileImage = await AsyncStorage.getItem("@profileImage");
+
+      if (userName) setuserName(userName);
+      if (bio) setBio(bio);
+      if (profileImage) {
+        setProfileImage(profileImage);
+      } else {
+        setProfileImage("");
+      }
+    } catch (e) {
+      console.log("An error occurred while loading data.");
+      console.log(e);
+    }
+  };
+
+  React.useEffect(() => {
     loadData();
   }, []);
 
   if (!loaded && !error) {
     return null;
   }
+
+  //Update Profile function.
+  let updateProfile = async (updates: {
+    name?: string;
+    bio?: string;
+    avatar?: string;
+  }) => {
+    try {
+      const userId = await AsyncStorage.getItem('@userId');
+      console.log(userId);
+
+      const response = await fetch(`${MOCK_API_AUTH_URL}/${userId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updates),
+      });
+
+      if (response.status == 200) {
+        console.log("Changes update Successfully.");
+      } else {
+        console.log(response.status);
+      }
+    } catch (e) {
+      console.log("Upadate failed.");
+      console.log(e);
+    }
+  };
 
   //handle Camera function.
   let takingPicture = async () => {
@@ -83,7 +157,7 @@ const ProfileScreen = ({ navigation }: any) => {
         return null;
       }
 
-      const result = await ImagePicker.launchCameraAsync({
+      const result: any = await ImagePicker.launchCameraAsync({
         allowsEditing: true,
         aspect: [1, 1],
         quality: 0.5,
@@ -93,6 +167,7 @@ const ProfileScreen = ({ navigation }: any) => {
         const uri = result.assets[0].uri;
         setProfileImage(uri);
         await AsyncStorage.setItem("@profileImage", uri);
+        await updateProfile({avatar: result});
       }
     } catch (e) {
       console.log("An error while taking picture!!");
@@ -109,7 +184,7 @@ const ProfileScreen = ({ navigation }: any) => {
         Alert.alert("Permission required", "Please allow gallery access.");
       }
 
-      const result = await ImagePicker.launchImageLibraryAsync({
+      const result:any = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
         aspect: [1, 1],
@@ -120,6 +195,7 @@ const ProfileScreen = ({ navigation }: any) => {
         const uri = result.assets[0].uri;
         setProfileImage(uri);
         await AsyncStorage.setItem("@profileImage", uri);
+        await updateProfile({avatar: result})
       }
     } catch (e) {
       console.log("An error occurred while choosing image.");
@@ -145,6 +221,7 @@ const ProfileScreen = ({ navigation }: any) => {
             try {
               setProfileImage("");
               await AsyncStorage.removeItem("@profileImage");
+              await updateProfile({avatar: ""});
             } catch (e) {
               console.log("An error occurred while deleting");
               console.log(e);
@@ -159,48 +236,15 @@ const ProfileScreen = ({ navigation }: any) => {
   //Save edit function
   let saveEdit = async (newName: string, newBio: string) => {
     try {
-      if (modalType === "Name") {
-        setuserName(newName);
-
-        const MOCK_API_URL =
-          "https://68482065ec44b9f3493fba2f.mockapi.io/api/v1/users";
-
-        const response = await fetch(MOCK_API_URL);
-        if (!response.ok) {
-          console.log("Failed to fetch data.");
-          return;
-        }
-
-        const users = await response.json();
-
-        const currentUserName = await AsyncStorage.getItem("@userName");
-        const foundUser = users.find(
-          (user: any) => user.userName === currentUserName,
-        );
-
-        if (!foundUser) {
-          console.log("User not found.");
-          return;
-        }
-
-        const nameResponse = await fetch(`${MOCK_API_URL}/${foundUser.id}`, {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ userName: newName }),
-        });
-
-        if (!nameResponse.ok) {
-          throw new Error(
-            `Failed to update name. Status: ${nameResponse.status}`,
-          );
-        }
-
-        await AsyncStorage.setItem("@userName", newName);
-      } else {
-        await AsyncStorage.setItem("@bio", newBio);
-        setBio(newBio);
+      if(modalType == "Name"){
+        setuserName(newName)
+        await AsyncStorage.setItem('@userName', newName);
+        await updateProfile({name: newName});
+      }else if(modalType == "Bio"){
+        const bio = newBio? newBio: "";
+        setBio(bio);
+        await AsyncStorage.setItem('@bio', bio);
+        await updateProfile({bio: bio});
       }
     } catch (e) {
       console.log("An error occurred while saving", e);

@@ -45,7 +45,6 @@ const SignupScreen = ({ navigation }: any) => {
   //Button handle funtion.
   let handleButton = async (uName: string, uEmail: string) => {
     try {
-      await AsyncStorage.setItem("@userName", uName);
       navigation.navigate("PasswordSetupScreen", {
         name: uName,
         email: uEmail,

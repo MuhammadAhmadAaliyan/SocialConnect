@@ -45,10 +45,10 @@ const ResetPasswordScreen = ({ navigation }: any) => {
   });
 
   //MOCK_API_URL
-  const MOCK_API_URL =
-    "https://68482065ec44b9f3493fba2f.mockapi.io/api/v1/users";
+  const MOCK_API_AUTH_URL =
+    "https://socialconnect-backend-production.up.railway.app/reset-password";
 
-  const { userId } = route.params as { userId: string };
+  const { userIndex } = route.params as { userIndex: number };
 
   React.useEffect(() => {
     if (loaded || error) {
@@ -63,41 +63,31 @@ const ResetPasswordScreen = ({ navigation }: any) => {
   //Reset password function.
   let handleReset = async (newPassword: string) => {
     try {
-      if (!userId) {
-        console.log("Error: userId is undefined.");
-        Alert.alert("Something went wrong", "User ID not found.");
-        return;
-      }
-
-      const url = `${MOCK_API_URL}/${userId}`;
-      console.log("PATCH URL:", url);
-
-      const response = await fetch(url, {
+      const response = await fetch(MOCK_API_AUTH_URL, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ password: newPassword }),
+        body: JSON.stringify({
+          userIndex: userIndex,
+          newPassword: newPassword,
+        }),
       });
 
-      if (!response.ok) {
-        throw new Error(
-          `Failed to update password. Status: ${response.status}`,
+      if (response.status == 200) {
+        Alert.alert(
+          "Success",
+          "Password changes Successfully. Now you can log in with your new Crendentials.",
         );
+        setButtonPressed(false);
+        navigation.reset({
+          index: 0,
+          routes: [{ name: "LoginScreen" }],
+        });
+      } else {
+        console.log(response.status);
+        setButtonPressed(false);
       }
-
-      console.log("Password reset Successfully");
-
-      Alert.alert(
-        "Reset Successful",
-        "Please log in with your new credentials",
-      );
-
-      navigation.reset({
-        index: 0,
-        routes: [{ name: "LoginScreen" }],
-      });
-      setButtonPressed(false);
     } catch (e) {
       console.log("An error occurred while resetting password");
       console.log(e);

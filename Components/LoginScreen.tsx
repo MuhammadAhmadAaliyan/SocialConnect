@@ -17,6 +17,7 @@ import { useFonts } from "expo-font";
 import { Formik } from "formik";
 import * as Yup from "yup";
 import { Ionicons } from "@expo/vector-icons";
+import { useAuth } from "../contexts/AuthContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 SplashScreen.preventAutoHideAsync();
@@ -30,11 +31,13 @@ const LoginScreen = ({ navigation }: any) => {
   });
   const [isPasswordVisible, setPasswordVisible] = React.useState(false);
   const [isButtonPressed, setButtonPressed] = React.useState(false);
-  const [incorrectUserCredentials, setIncorrectUserCredentials] = React.useState("");
+  const [incorrectUserCredentials, setIncorrectUserCredentials] =
+    React.useState("");
+  const auth = useAuth();
 
   //MOCK_API_URL
-  const MOCK_API_URL =
-    "https://68482065ec44b9f3493fba2f.mockapi.io/api/v1/users";
+  const MOCK_API_AUTH_URL =
+    "https://socialconnect-backend-production.up.railway.app/login";
 
   //Input Validation Schema.
   const validationSchema = Yup.object().shape({
@@ -59,33 +62,36 @@ const LoginScreen = ({ navigation }: any) => {
   //Handle Login Function
   let handleLogin = async (email: string, password: string) => {
     try {
-      const response = await fetch(MOCK_API_URL);
-      if (!response.ok) {
-        throw new Error(
-          "Failed to fetch data. Please check your Internet Connection.",
-        );
-      }
+      const response = await fetch(MOCK_API_AUTH_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
 
-      const users = await response.json();
-
-      const foundUser = users.find(
-        (user: any) => user.email === email && user.password === password,
-      );
-
-      if (foundUser) {
-        console.log("Login Successful.");
+      if (response.status == 401) {
+        setIncorrectUserCredentials("Incorrect email or password.");
         setButtonPressed(false);
-        await AsyncStorage.setItem('@userLoggedIn', "true");
+      } else if (response.status == 200) {
+        setButtonPressed(false);
         navigation.reset({
           index: 0,
           routes: [{ name: "Tabs" }],
         });
+
+        const data = await response.json();
+
+        auth.login(data);
+        console.log(data);
+
+        await AsyncStorage.setItem("@userLoggedIn", "true");
       } else {
-        setIncorrectUserCredentials("Incorrect email or password");
+        console.log(response.status);
         setButtonPressed(false);
       }
     } catch (e) {
-      console.log("Login Error occured");
+      console.log("Login Error.");
       console.log(e);
     }
   };
@@ -104,7 +110,9 @@ const LoginScreen = ({ navigation }: any) => {
             <Text style={styles.welcome}>Welcome</Text>
             <Text style={styles.loginText}>Login to Continue</Text>
           </View>
-          <Text style={styles.incorrectCrendentials}>{incorrectUserCredentials}</Text>
+          <Text style={styles.incorrectCrendentials}>
+            {incorrectUserCredentials}
+          </Text>
           <Formik
             initialValues={{ email: "", password: "" }}
             validationSchema={validationSchema}
@@ -305,11 +313,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
   },
-  incorrectCrendentials:{
+  incorrectCrendentials: {
     fontSize: 18,
-    fontFamily: 'PoppinsMedium',
-    color: 'red',
-    textAlign: 'center',
-    paddingBottom: 8
-  }
+    fontFamily: "PoppinsMedium",
+    color: "red",
+    textAlign: "center",
+    paddingBottom: 8,
+  },
 });
