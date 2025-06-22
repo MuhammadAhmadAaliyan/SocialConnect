@@ -568,7 +568,7 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     marginVertical: "6%",
     padding: 10,
-    alignItems: "flex-start", // So top aligns for multiline text
+    alignItems: "flex-start",
     justifyContent: "space-between",
     flexWrap: "nowrap",
   },

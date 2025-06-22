@@ -15,6 +15,7 @@ import * as SplashScreen from "expo-splash-screen";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { usePosts} from '../contexts/PostsContext'
 
 const HomeScreen = ({ navigation }: any) => {
   const [loaded, error] = useFonts({
@@ -24,13 +25,16 @@ const HomeScreen = ({ navigation }: any) => {
     PoppinsBold: require("../assets/fonts/Poppins-Bold.ttf"),
   });
   const [profileImage, setProfileImage] = React.useState<string>();
-  const [posts, setPosts] = React.useState<any>([]);
   const [loading, setLoading] = React.useState(true);
-  const [currentUserId, setCurrentUserId] = React.useState("");
+  const {posts, setPosts, likePost, unlikePost} = usePosts();
+  const [userId, setUserId] = React.useState<string | null>(null);
 
-  //Post URL.
-  const POST_URL =
+  //MOCK_API_POST_URL
+  const MOCK_API_POST_URL =
     "https://socialconnect-backend-production.up.railway.app/posts";
+
+  //MOCK_API_USER_URL;
+  const MOCK_API_USER_URL = "https://socialconnect-backend-production.up.railway.app/users";  
 
   React.useEffect(() => {
     if (loaded || error) {
@@ -42,26 +46,32 @@ const HomeScreen = ({ navigation }: any) => {
 const fetchPosts = async () => {
   setLoading(true);
   try {
-    const res = await fetch(POST_URL);
-    const data = await res.json();
+    const [postResponse, userResponse] = await Promise.all([
+      fetch(MOCK_API_POST_URL),
+      fetch(MOCK_API_USER_URL)
+    ])
+    if(!postResponse.ok || !userResponse.ok){
+      console.log("An error occur while fetching!!");
+      return;
+    }
 
-    const likedData = await AsyncStorage.getItem("@likedPosts");
-    const unlikedData = await AsyncStorage.getItem("@unlikedPosts");
-    const likedPosts = likedData ? JSON.parse(likedData) : [];
-    const unlikedPosts = unlikedData ? JSON.parse(unlikedData) : [];
+    
+      const posts = await postResponse.json();
+      const users = await userResponse.json();
 
-    // Apply button state from AsyncStorage
-    const enrichedPosts = data.map((post: any) => ({
-      ...post,
-      likedBy: likedPosts.includes(post.id)
-        ? [...new Set([...post.likedBy, currentUserId])]
-        : post.likedBy.filter((id: string) => id !== currentUserId),
-      unlikedBy: unlikedPosts.includes(post.id)
-        ? [...new Set([...post.unlikedBy, currentUserId])]
-        : post.unlikedBy.filter((id: string) => id !== currentUserId),
-    }));
+      const mergedResponse = posts.map((post: any) => {
+        const user = users.find((u: any) => u.id == post.userId);
+        return{
+          ...post,
+          user: user || {}
+        };
+      })
+       .sort((a: any, b: any) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 
-    setPosts(enrichedPosts);
+      setPosts(mergedResponse);
+      const userId = await AsyncStorage.getItem('@userId');
+      if(userId) setUserId(userId);
+      console.log(userId);
   } catch (e) {
     console.log("Error fetching posts:", e);
   } finally {
@@ -69,20 +79,9 @@ const fetchPosts = async () => {
   }
 };
 
-
-  React.useEffect(() => {
-    let fetchingPosts = async () => {
-      try {
-        fetchPosts();
-        await AsyncStorage.getItem("@userId").then((id: any) => {
-          if (id) setCurrentUserId(id);
-        });
-      } catch (e) {
-        console.log(e);
-      }
-    };
-    fetchingPosts();
-  }, []);
+React.useEffect(() => {
+  fetchPosts();
+}, [])
 
   //Load data from memory.
   useFocusEffect(() => {
@@ -103,79 +102,6 @@ const fetchPosts = async () => {
     loadData();
   });
 
-  //toogle like and unlike.
-const toggleReaction = async (postId: string, action: "like" | "unlike") => {
-  try {
-    const likedKey = "@likedPosts";
-    const unlikedKey = "@unlikedPosts";
-
-    const likedData = await AsyncStorage.getItem(likedKey);
-    const unlikedData = await AsyncStorage.getItem(unlikedKey);
-
-    let likedPosts = likedData ? JSON.parse(likedData) : [];
-    let unlikedPosts = unlikedData ? JSON.parse(unlikedData) : [];
-
-    const hasLiked = likedPosts.includes(postId);
-    const hasUnliked = unlikedPosts.includes(postId);
-
-    // Update AsyncStorage
-    if (action === "like") {
-      if (hasLiked) {
-        likedPosts = likedPosts.filter((id: string) => id !== postId);
-      } else {
-        likedPosts.push(postId);
-        if (hasUnliked) {
-          unlikedPosts = unlikedPosts.filter((id: string) => id !== postId);
-        }
-      }
-    } else {
-      if (hasUnliked) {
-        unlikedPosts = unlikedPosts.filter((id: string) => id !== postId);
-      } else {
-        unlikedPosts.push(postId);
-        if (hasLiked) {
-          likedPosts = likedPosts.filter((id: string) => id !== postId);
-        }
-      }
-    }
-
-    await AsyncStorage.setItem(likedKey, JSON.stringify(likedPosts));
-    await AsyncStorage.setItem(unlikedKey, JSON.stringify(unlikedPosts));
-
-    // Update local UI state
-    setPosts((prevPosts: any) =>
-      prevPosts.map((post: any) =>
-        post.id === postId
-          ? {
-              ...post,
-              likedBy: likedPosts.includes(postId)
-                ? [...new Set([...post.likedBy, currentUserId])]
-                : post.likedBy.filter((id: string) => id !== currentUserId),
-              unlikedBy: unlikedPosts.includes(postId)
-                ? [...new Set([...post.unlikedBy, currentUserId])]
-                : post.unlikedBy.filter((id: string) => id !== currentUserId),
-              likes: likedPosts.includes(postId)
-                ? post.likes + (hasLiked ? -1 : 1)
-                : post.likes - (hasLiked ? 1 : 0),
-              unlikes: unlikedPosts.includes(postId)
-                ? post.unlikes + (hasUnliked ? -1 : 1)
-                : post.unlikes - (hasUnliked ? 1 : 0),
-            }
-          : post
-      )
-    );
-
-    // Sync with backend
-    await fetch(`${POST_URL}/${postId}/${action}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId: currentUserId }),
-    });
-  } catch (err) {
-    console.error(`Error toggling ${action}:`, err);
-  }
-};
-
   if (!loaded && !error) {
     return null;
   }
@@ -183,6 +109,10 @@ const toggleReaction = async (postId: string, action: "like" | "unlike") => {
   let renderItem = ({ item }: any) => (
     <View style={styles.card}>
       <View style={styles.userRow}>
+        <Pressable onPress={() => {
+          console.log(item.user.id);
+          navigation.navigate("UserInfoScreen", {userId: item.user.id});
+          }}>
         <Image
           source={
             item.user.avatar
@@ -191,6 +121,7 @@ const toggleReaction = async (postId: string, action: "like" | "unlike") => {
           }
           style={[styles.avatar, { height: 40, width: 40 }]}
         />
+        </Pressable>
         <View style={styles.userInfo}>
           <Text style={styles.userName}>{item.user.name}</Text>
           <Text style={styles.timeStamp}>
@@ -199,10 +130,10 @@ const toggleReaction = async (postId: string, action: "like" | "unlike") => {
         </View>
       </View>
       <View style={styles.postSection}>
-        <Text style={styles.postText}>{item.content}</Text>
-        {item.imageUrl ? (
+        <Text style={styles.postText}>{item.text}</Text>
+        {item.image ? (
           <Image
-            source={{ uri: item.imageUrl }}
+            source={{ uri: item.image }}
             resizeMode={"cover"}
             style={styles.postImage}
           />
@@ -210,31 +141,25 @@ const toggleReaction = async (postId: string, action: "like" | "unlike") => {
       </View>
       <View style={styles.counter}>
         <View style={{ flexDirection: "row", gap: "20%" }}>
-          <Text style={styles.counterText}>{item.likes} Likes</Text>
-          <Text style={styles.counterText}>{item.unlikes} Unlikes</Text>
+          <Text style={styles.counterText}>{item.likedBy.length} Likes</Text>
+          <Text style={styles.counterText}>{item.unlikedBy.length} Unlikes</Text>
         </View>
         <Text style={styles.counterText}>{item.comments.length} comments</Text>
       </View>
       <View style={styles.Button}>
         <View style={{ flexDirection: "row", gap: "25%" }}>
-          <Pressable onPress={() => toggleReaction(item.id, "like")}>
+          <Pressable onPress={() => {
+            likePost(item.id, userId);
+            }}>
             <MaterialCommunityIcons
-              name={
-                item.likedBy.includes(currentUserId)
-                  ? "thumb-up"
-                  : "thumb-up-outline"
-              }
+              name={item.likedBy.includes(userId)? "thumb-up": "thumb-up-outline"}
               size={30}
               color={"#4F46E5"}
             />
           </Pressable>
-          <Pressable onPress={() => toggleReaction(item.id, "unlike")}>
+          <Pressable onPress={() => unlikePost(item.id, userId)}>
             <MaterialCommunityIcons
-              name={
-                item.unlikedBy.includes(currentUserId)
-                  ? "thumb-down"
-                  : "thumb-down-outline"
-              }
+              name={item.unlikedBy.includes(userId)? "thumb-down": "thumb-down-outline"}
               size={30}
               color={"#4F46E5"}
             />

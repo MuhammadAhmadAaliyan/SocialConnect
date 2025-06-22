@@ -5,6 +5,8 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SplashScreen from "expo-splash-screen";
 import { AuthProvider } from "./contexts/AuthContext";
+import { PostProvider } from "./contexts/PostsContext";
+import { useFonts } from "expo-font";
 
 //Importing Screens.
 import LoginScreen from "./Components/LoginScreen";
@@ -15,12 +17,19 @@ import ResetPasswordScreen from "./Components/ResetPasswordScreen";
 import Tabs from "./Components/Tabs";
 import ProfileScreen from "./Components/ProfileScreen";
 import CreatePostScreen from "./Components/CreatePostScreen";
+import UserInfoScreen from "./Components/UserInfoScreen";
 
 const Stack = createNativeStackNavigator();
 
 SplashScreen.preventAutoHideAsync();
 
 export default function App() {
+  const [loaded, error] = useFonts({
+    DancingScriptBold: require("./assets/fonts/DancingScript-Bold.ttf"),
+    PoppinsMedium: require("./assets/fonts/Poppins-Medium.ttf"),
+    PoppinsRegular: require("./assets/fonts/Poppins-Regular.ttf"),
+    PoppinsBold: require("./assets/fonts/Poppins-Bold.ttf"),
+  });
   const [isAppReady, setIsAppReady] = React.useState(false);
   const [isLoggedIn, setIsLoggedIn] = React.useState<boolean | null>(null);
 
@@ -39,58 +48,88 @@ export default function App() {
   }, []);
 
   const onLayoutRootView = React.useCallback(async () => {
-    if (isAppReady) {
+    if ((isAppReady && loaded) || error) {
       await SplashScreen.hideAsync();
     }
-  }, [isAppReady]);
+  }, [isAppReady, loaded, error]);
 
-  if (!isAppReady) return null;
+  if (!isAppReady || !loaded) return null;
 
   return (
     <AuthProvider>
-      <View style={styles.container} onLayout={onLayoutRootView}>
-        <NavigationContainer>
-          <Stack.Navigator screenOptions={{ headerShown: false }}>
-            {isLoggedIn ? (
-              <>
-                <Stack.Screen name="Tabs" component={Tabs} />
-                <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
-                <Stack.Screen
-                  name={"CreatePostScreen"}
-                  component={CreatePostScreen}
-                />
-              </>
-            ) : (
-              <>
-                <Stack.Screen name="LoginScreen" component={LoginScreen} />
-                <Stack.Screen name="SignupScreen" component={SignupScreen} />
-                <Stack.Screen
-                  name="PasswordSetupScreen"
-                  component={PasswordSetupScreen}
-                />
-                <Stack.Screen
-                  name="ForgetPasswordScreen"
-                  component={ForgetPasswordScreen}
-                />
-                <Stack.Screen
-                  name="ResetPasswordScreen"
-                  component={ResetPasswordScreen}
-                />
-                <Stack.Screen name="Tabs" component={Tabs} />
-                <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
-                <Stack.Screen
-                  name={"CreatePostScreen"}
-                  component={CreatePostScreen}
-                  options={{
-                    headerShown: true,
-                    headerTitle: "Create new Post",
-                  }}
-                />
-              </>
-            )}
-          </Stack.Navigator>
-        </NavigationContainer>
-      </View>
+      <PostProvider>
+        <View style={styles.container} onLayout={onLayoutRootView}>
+          <NavigationContainer>
+            <Stack.Navigator screenOptions={{ headerShown: false }}>
+              {isLoggedIn ? (
+                <>
+                  <Stack.Screen name="Tabs" component={Tabs} />
+                  <Stack.Screen
+                    name="ProfileScreen"
+                    component={ProfileScreen}
+                  />
+                  <Stack.Screen
+                    name="UserInfoScreen"
+                    component={UserInfoScreen}
+                    options={{
+                      headerShown: true,
+                      headerTitle: "User Info",
+                      headerTitleStyle: { fontFamily: "PoppinsMedium" },
+                    }}
+                  />
+                  <Stack.Screen
+                    name={"CreatePostScreen"}
+                    component={CreatePostScreen}
+                    options={{
+                      headerShown: true,
+                      headerTitle: "Create new Post",
+                    }}
+                  />
+                </>
+              ) : (
+                <>
+                  <Stack.Screen name="LoginScreen" component={LoginScreen} />
+                  <Stack.Screen name="SignupScreen" component={SignupScreen} />
+                  <Stack.Screen
+                    name="PasswordSetupScreen"
+                    component={PasswordSetupScreen}
+                  />
+                  <Stack.Screen
+                    name="ForgetPasswordScreen"
+                    component={ForgetPasswordScreen}
+                  />
+                  <Stack.Screen
+                    name="ResetPasswordScreen"
+                    component={ResetPasswordScreen}
+                  />
+                  <Stack.Screen name="Tabs" component={Tabs} />
+                  <Stack.Screen
+                    name="ProfileScreen"
+                    component={ProfileScreen}
+                  />
+                  <Stack.Screen
+                    name={"CreatePostScreen"}
+                    component={CreatePostScreen}
+                    options={{
+                      headerShown: true,
+                      headerTitle: "Create new Post",
+                    }}
+                  />
+                  <Stack.Screen
+                    name="UserInfoScreen"
+                    component={UserInfoScreen}
+                    options={{
+                      headerShown: true,
+                      headerTitle: "User Info",
+                      headerTitleStyle: { fontFamily: "PoppinsMedium" },
+                    }}
+                  />
+                </>
+              )}
+            </Stack.Navigator>
+          </NavigationContainer>
+        </View>
+      </PostProvider>
     </AuthProvider>
   );
 }
