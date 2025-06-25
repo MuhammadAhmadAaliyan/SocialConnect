@@ -18,6 +18,7 @@ import Tabs from "./Components/Tabs";
 import ProfileScreen from "./Components/ProfileScreen";
 import CreatePostScreen from "./Components/CreatePostScreen";
 import UserInfoScreen from "./Components/UserInfoScreen";
+import CommentsScreen from "./Components/CommentsScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -69,6 +70,15 @@ export default function App() {
                     component={ProfileScreen}
                   />
                   <Stack.Screen
+                    name={"CreatePostScreen"}
+                    component={CreatePostScreen}
+                    options={{
+                      headerShown: true,
+                      headerTitle: "Create new Post",
+                      headerTitleStyle: { fontFamily: "PoppinsMedium" },
+                    }}
+                  />
+                  <Stack.Screen
                     name="UserInfoScreen"
                     component={UserInfoScreen}
                     options={{
@@ -78,11 +88,14 @@ export default function App() {
                     }}
                   />
                   <Stack.Screen
-                    name={"CreatePostScreen"}
-                    component={CreatePostScreen}
+                    name="CommentsScreen"
+                    component={CommentsScreen}
                     options={{
                       headerShown: true,
-                      headerTitle: "Create new Post",
+                      headerTitle: "Comments",
+                      headerTitleStyle: {
+                        fontFamily: "PoppinsMedium",
+                      },
                     }}
                   />
                 </>
@@ -113,6 +126,7 @@ export default function App() {
                     options={{
                       headerShown: true,
                       headerTitle: "Create new Post",
+                      headerTitleStyle: { fontFamily: "PoppinsMedium" },
                     }}
                   />
                   <Stack.Screen
@@ -122,6 +136,17 @@ export default function App() {
                       headerShown: true,
                       headerTitle: "User Info",
                       headerTitleStyle: { fontFamily: "PoppinsMedium" },
+                    }}
+                  />
+                  <Stack.Screen
+                    name="CommentsScreen"
+                    component={CommentsScreen}
+                    options={{
+                      headerShown: true,
+                      headerTitle: "Comments",
+                      headerTitleStyle: {
+                        fontFamily: "PoppinsMedium",
+                      },
                     }}
                   />
                 </>

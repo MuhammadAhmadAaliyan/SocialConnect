@@ -44,6 +44,8 @@ const PasswordSetupScreen = ({ navigation }: any) => {
       .required("Password is Required"),
   });
 
+  const generateId = () => (Date.now().toString(36) + Math.random().toString(36).substring(2));
+
   //MOCK_API_URL
   const MOCK_API_AUTH_URL =
     "https://socialconnect-backend-production.up.railway.app/signup";
@@ -64,7 +66,7 @@ const PasswordSetupScreen = ({ navigation }: any) => {
   let handleSignup = async (password: string) => {
     try {
       const newUser = {
-        id: Date.now().toString(),
+        id: generateId(),
         name: name,
         email: email,
         password: password

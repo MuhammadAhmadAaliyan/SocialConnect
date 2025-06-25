@@ -15,7 +15,7 @@ import * as SplashScreen from "expo-splash-screen";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { usePosts} from '../contexts/PostsContext'
+import { usePosts } from "../contexts/PostsContext";
 
 const HomeScreen = ({ navigation }: any) => {
   const [loaded, error] = useFonts({
@@ -26,7 +26,7 @@ const HomeScreen = ({ navigation }: any) => {
   });
   const [profileImage, setProfileImage] = React.useState<string>();
   const [loading, setLoading] = React.useState(true);
-  const {posts, setPosts, likePost, unlikePost} = usePosts();
+  const { posts, setPosts, likePost, unlikePost } = usePosts();
   const [userId, setUserId] = React.useState<string | null>(null);
 
   //MOCK_API_POST_URL
@@ -34,7 +34,8 @@ const HomeScreen = ({ navigation }: any) => {
     "https://socialconnect-backend-production.up.railway.app/posts";
 
   //MOCK_API_USER_URL;
-  const MOCK_API_USER_URL = "https://socialconnect-backend-production.up.railway.app/users";  
+  const MOCK_API_USER_URL =
+    "https://socialconnect-backend-production.up.railway.app/users";
 
   React.useEffect(() => {
     if (loaded || error) {
@@ -43,45 +44,61 @@ const HomeScreen = ({ navigation }: any) => {
   }, [loaded, error]);
 
   //fetch Posts from backend.
-const fetchPosts = async () => {
-  setLoading(true);
-  try {
-    const [postResponse, userResponse] = await Promise.all([
-      fetch(MOCK_API_POST_URL),
-      fetch(MOCK_API_USER_URL)
-    ])
-    if(!postResponse.ok || !userResponse.ok){
-      console.log("An error occur while fetching!!");
-      return;
-    }
+  const fetchPosts = async () => {
+    setLoading(true);
+    try {
+      const [postResponse, userResponse] = await Promise.all([
+        fetch(MOCK_API_POST_URL),
+        fetch(MOCK_API_USER_URL),
+      ]);
+      if (!postResponse.ok || !userResponse.ok) {
+        console.log("An error occur while fetching!!");
+        return;
+      }
 
-    
       const posts = await postResponse.json();
       const users = await userResponse.json();
 
-      const mergedResponse = posts.map((post: any) => {
-        const user = users.find((u: any) => u.id == post.userId);
-        return{
-          ...post,
-          user: user || {}
-        };
-      })
-       .sort((a: any, b: any) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+      const mergedResponse = posts
+        .map((post: any) => {
+          const user = users.find((u: any) => u.id == post.userId);
+          return {
+            ...post,
+            user: user || {},
+          };
+        })
+        .sort(
+          (a: any, b: any) =>
+            new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
+        );
 
       setPosts(mergedResponse);
-      const userId = await AsyncStorage.getItem('@userId');
-      if(userId) setUserId(userId);
-      console.log(userId);
-  } catch (e) {
-    console.log("Error fetching posts:", e);
-  } finally {
-    setLoading(false);
-  }
-};
+      const userId = await AsyncStorage.getItem("@userId");
+      if (userId) setUserId(userId);
+    } catch (e) {
+      console.log("Error fetching posts:", e);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-React.useEffect(() => {
-  fetchPosts();
-}, [])
+  React.useEffect(() => {
+    fetchPosts();
+  }, []);
+
+  //Refresh Posts when user create new Post.
+  useFocusEffect(
+    React.useCallback(() => {
+      const checkRefresh = async () => {
+        const shouldRefresh = await AsyncStorage.getItem("@shouldRefreshPosts");
+        if (shouldRefresh === "true") {
+          await AsyncStorage.removeItem("@shouldRefreshPosts");
+          fetchPosts();
+        }
+      };
+      checkRefresh();
+    }, []),
+  );
 
   //Load data from memory.
   useFocusEffect(() => {
@@ -106,35 +123,50 @@ React.useEffect(() => {
     return null;
   }
 
+  //Update post count
+  const updatePostCommentCount = (postId: string, newComment: any) => {
+  setPosts((prevPosts) =>
+    prevPosts.map((post) =>
+      post.id === postId
+        ? { ...post, comments: [newComment, ...post.comments] }
+        : post
+    )
+  );
+};
+
   let renderItem = ({ item }: any) => (
     <View style={styles.card}>
       <View style={styles.userRow}>
-        <Pressable onPress={() => {
-          console.log(item.user.id);
-          navigation.navigate("UserInfoScreen", {userId: item.user.id});
-          }}>
-        <Image
-          source={
-            item.user.avatar
-              ? { uri: item.user.avatar }
-              : require("../assets/Default Avatar.jpg")
-          }
-          style={[styles.avatar, { height: 40, width: 40 }]}
-        />
+        <Pressable
+          onPress={() => {
+            console.log(item.user.id);
+            navigation.navigate("UserInfoScreen", { userId: item.user.id });
+          }}
+        >
+          <Image
+            source={
+              item.user.avatar
+                ? { uri: item.user.avatar }
+                : require("../assets/Default Avatar.jpg")
+            }
+            style={[styles.avatar, { height: 40, width: 40 }]}
+          />
         </Pressable>
         <View style={styles.userInfo}>
-          <Text style={styles.userName}>{item.user.name}</Text>
+          <Text style={styles.userName}>
+            {item.user.id == userId ? "You" : item.user.name}
+          </Text>
           <Text style={styles.timeStamp}>
             {new Date(item.timestamp).toLocaleString()}
           </Text>
         </View>
       </View>
       <View style={styles.postSection}>
-        <Text style={styles.postText}>{item.text}</Text>
-        {item.image ? (
+        {item.text ? <Text style={styles.postText}>{item.text}</Text> : null}
+        {typeof item.image === "string" && item.image !== "" ? (
           <Image
             source={{ uri: item.image }}
-            resizeMode={"cover"}
+            resizeMode="cover"
             style={styles.postImage}
           />
         ) : null}
@@ -142,30 +174,48 @@ React.useEffect(() => {
       <View style={styles.counter}>
         <View style={{ flexDirection: "row", gap: "20%" }}>
           <Text style={styles.counterText}>{item.likedBy.length} Likes</Text>
-          <Text style={styles.counterText}>{item.unlikedBy.length} Unlikes</Text>
+          <Text style={styles.counterText}>
+            {item.unlikedBy.length} Unlikes
+          </Text>
         </View>
-        <Text style={styles.counterText}>{item.comments.length} comments</Text>
+        <Text style={styles.counterText}>{item.comments.length} Comments</Text>
       </View>
       <View style={styles.Button}>
         <View style={{ flexDirection: "row", gap: "25%" }}>
-          <Pressable onPress={() => {
-            likePost(item.id, userId);
-            }}>
+          <Pressable
+            onPress={() => {
+              likePost(item.id, userId);
+            }}
+          >
             <MaterialCommunityIcons
-              name={item.likedBy.includes(userId)? "thumb-up": "thumb-up-outline"}
+              name={
+                item.likedBy.includes(userId) ? "thumb-up" : "thumb-up-outline"
+              }
               size={30}
               color={"#4F46E5"}
             />
           </Pressable>
           <Pressable onPress={() => unlikePost(item.id, userId)}>
             <MaterialCommunityIcons
-              name={item.unlikedBy.includes(userId)? "thumb-down": "thumb-down-outline"}
+              name={
+                item.unlikedBy.includes(userId)
+                  ? "thumb-down"
+                  : "thumb-down-outline"
+              }
               size={30}
               color={"#4F46E5"}
             />
           </Pressable>
         </View>
-        <Pressable>
+        <Pressable
+          onPress={() => {
+            navigation.navigate("CommentsScreen", { 
+              postId: item.id,
+              onCommentAdded: (newComment: any) => updatePostCommentCount(item.id, newComment)
+            });
+            console.log(item.id);
+          }}
+        >
           <MaterialCommunityIcons
             name={"comment-text"}
             size={30}
@@ -178,11 +228,13 @@ React.useEffect(() => {
 
   if (loading)
     return (
-      <ActivityIndicator
-        size={"large"}
-        color={"#4F46E5"}
-        style={{ marginTop: 100 }}
-      />
+      <View style={{ backgroundColor: "#ffffff", flex: 1 }}>
+        <ActivityIndicator
+          size={"large"}
+          color={"#4F46E5"}
+          style={{ marginTop: 100 }}
+        />
+      </View>
     );
 
   return (

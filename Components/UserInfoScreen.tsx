@@ -68,14 +68,16 @@ fetchUserInfo();
     return null;
   }
 
-    if (loading)
-      return (
+  if (loading)
+    return (
+      <View style={{backgroundColor: '#ffffff', flex: 1}}>
         <ActivityIndicator
           size={"large"}
           color={"#4F46E5"}
           style={{ marginTop: 100 }}
         />
-      );
+      </View>
+    );
 
   return (
     <SafeAreaView style={styles.container}>

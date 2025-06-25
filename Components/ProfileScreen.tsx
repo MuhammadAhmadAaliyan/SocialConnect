@@ -118,35 +118,6 @@ const ProfileScreen = ({ navigation }: any) => {
     return null;
   }
 
-  //Update Profile function.
-  let updateProfile = async (updates: {
-    name?: string;
-    bio?: string;
-    avatar?: string;
-  }) => {
-    try {
-      const userId = await AsyncStorage.getItem('@userId');
-      console.log(userId);
-
-      const response = await fetch(`${MOCK_API_AUTH_URL}/${userId}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(updates),
-      });
-
-      if (response.status == 200) {
-        console.log("Changes update Successfully.");
-      } else {
-        console.log(response.status);
-      }
-    } catch (e) {
-      console.log("Upadate failed.");
-      console.log(e);
-    }
-  };
-
   //handle Camera function.
   let takingPicture = async () => {
     try {
@@ -167,7 +138,9 @@ const ProfileScreen = ({ navigation }: any) => {
         const uri = result.assets[0].uri;
         setProfileImage(uri);
         await AsyncStorage.setItem("@profileImage", uri);
-        await updateProfile({avatar: result});
+
+        const secureUrl = await uploadImageToCloudnary(uri);
+        await updateProfile({avatar: secureUrl});
       }
     } catch (e) {
       console.log("An error while taking picture!!");
@@ -195,13 +168,47 @@ const ProfileScreen = ({ navigation }: any) => {
         const uri = result.assets[0].uri;
         setProfileImage(uri);
         await AsyncStorage.setItem("@profileImage", uri);
-        await updateProfile({avatar: result})
+        const secureUrl = await uploadImageToCloudnary(uri);
+        console.log(secureUrl);
+        await updateProfile({avatar: secureUrl})
       }
     } catch (e) {
       console.log("An error occurred while choosing image.");
       console.log(e);
     }
   };
+
+  //Upload image to cloudinary
+let uploadImageToCloudnary = async (imageUri: any) => {
+  try{
+      const data = new FormData();
+        data.append( "file",{
+          uri: imageUri,
+          type: "image/jpeg",
+          name: "postImage.jpeg"
+        } as any);
+
+        data.append("upload_preset", "my_uploads");
+        data.append("cloud_name", "dofkcofc1");
+
+    const response = await fetch("https://api.cloudinary.com/v1_1/dofkcofc1/image/upload", {
+      method: "POST",
+      body: data
+    });
+
+        const result = await response.json();
+    if (result.secure_url) {
+      console.log(result.secure_url);
+      return result.secure_url;
+    } else {
+      console.error("Cloudinary upload failed:", result);
+      return null;
+    }
+  }catch(e){
+    console.log("Failed to upload in Cloudinary.");
+    console.log(e);
+  }
+}
 
   //Delete profile image function.
   let handleDelete = () => {
@@ -248,6 +255,36 @@ const ProfileScreen = ({ navigation }: any) => {
       }
     } catch (e) {
       console.log("An error occurred while saving", e);
+    }
+  };
+
+    //Update Profile function.
+  let updateProfile = async (updates: {
+    name?: string;
+    bio?: string;
+    avatar?: string;
+  }) => {
+    try {
+      const userId = await AsyncStorage.getItem('@userId');
+      console.log(userId);
+
+      const response = await fetch(`${MOCK_API_AUTH_URL}/${userId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updates),
+      });
+
+      if (response.status == 200) {
+        console.log("Changes update Successfully.");
+        await AsyncStorage.setItem('@shouldRefreshPosts', "true");
+      } else {
+        console.log(response.status);
+      }
+    } catch (e) {
+      console.log("Upadate failed.");
+      console.log(e);
     }
   };
 
