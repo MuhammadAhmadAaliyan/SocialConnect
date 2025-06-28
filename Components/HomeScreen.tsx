@@ -9,6 +9,7 @@ import {
   FlatList,
   ActivityIndicator,
   RefreshControl,
+  Dimensions,
 } from "react-native";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
@@ -16,6 +17,12 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { usePosts } from "../contexts/PostsContext";
+import { useAuth } from "../contexts/AuthContext";
+
+  //Calculate Image dimension
+  const screenWidth = Dimensions.get("window").width;
+  const imageWidth = screenWidth * 0.9;
+  const imageHeight = (screenWidth * 5) / 4;
 
 const HomeScreen = ({ navigation }: any) => {
   const [loaded, error] = useFonts({
@@ -28,6 +35,7 @@ const HomeScreen = ({ navigation }: any) => {
   const [loading, setLoading] = React.useState(true);
   const { posts, setPosts, likePost, unlikePost } = usePosts();
   const [userId, setUserId] = React.useState<string | null>(null);
+  const auth = useAuth();
 
   //MOCK_API_POST_URL
   const MOCK_API_POST_URL =
@@ -86,6 +94,38 @@ const HomeScreen = ({ navigation }: any) => {
     fetchPosts();
   }, []);
 
+  //Save data into  memory.
+  React.useEffect(() => {
+    let saveData = async () => {
+      try {
+        if (auth.user && auth.user.user) {
+          const userName = auth.user.user.name;
+          const bio = auth.user.user.bio;
+          const profileImage = auth.user.user.avatar;
+          const userId = auth.user.user.id;
+
+          if (userName) {
+            await AsyncStorage.setItem("@userName", userName);
+          }
+          if (bio) {
+            await AsyncStorage.setItem("@bio", bio);
+          }
+          if (profileImage) {
+            await AsyncStorage.setItem("@profileImage", profileImage);
+          }
+          if (userId) {
+            await AsyncStorage.setItem("@userId", userId);
+            console.log(userId);
+          }
+        }
+      } catch (e) {
+        console.log("An error occurred while saving data");
+      }
+    };
+
+    saveData();
+  }, [auth.user]);
+
   //Refresh Posts when user create new Post.
   useFocusEffect(
     React.useCallback(() => {
@@ -122,17 +162,6 @@ const HomeScreen = ({ navigation }: any) => {
   if (!loaded && !error) {
     return null;
   }
-
-  //Update post count
-  const updatePostCommentCount = (postId: string, newComment: any) => {
-  setPosts((prevPosts) =>
-    prevPosts.map((post) =>
-      post.id === postId
-        ? { ...post, comments: [newComment, ...post.comments] }
-        : post
-    )
-  );
-};
 
   let renderItem = ({ item }: any) => (
     <View style={styles.card}>
@@ -173,12 +202,16 @@ const HomeScreen = ({ navigation }: any) => {
       </View>
       <View style={styles.counter}>
         <View style={{ flexDirection: "row", gap: "20%" }}>
-          <Text style={styles.counterText}>{item.likedBy.length} Likes</Text>
           <Text style={styles.counterText}>
-            {item.unlikedBy.length} Unlikes
+            {formatCount(item.likedBy.length)} Likes
+          </Text>
+          <Text style={styles.counterText}>
+            {formatCount(item.unlikedBy.length)} Unlikes
           </Text>
         </View>
-        <Text style={styles.counterText}>{item.comments.length} Comments</Text>
+        <Text style={styles.counterText}>
+          {formatCount(item.comments.length)} Comments
+        </Text>
       </View>
       <View style={styles.Button}>
         <View style={{ flexDirection: "row", gap: "25%" }}>
@@ -209,10 +242,7 @@ const HomeScreen = ({ navigation }: any) => {
         </View>
         <Pressable
           onPress={() => {
-            navigation.navigate("CommentsScreen", { 
-              postId: item.id,
-              onCommentAdded: (newComment: any) => updatePostCommentCount(item.id, newComment)
-            });
+            navigation.navigate("CommentsScreen", { postId: item.id });
             console.log(item.id);
           }}
         >
@@ -225,6 +255,17 @@ const HomeScreen = ({ navigation }: any) => {
       </View>
     </View>
   );
+
+  //format count
+  const formatCount = (count: number): string => {
+    if (count >= 1_000_000) {
+      return (count / 1_000_000).toFixed(1).replace(/\.0$/, "") + "M";
+    } else if (count >= 1_000) {
+      return (count / 1_000).toFixed(1).replace(/\.0$/, "") + "K";
+    } else {
+      return count.toString();
+    }
+  };
 
   if (loading)
     return (
@@ -341,8 +382,8 @@ const styles = StyleSheet.create({
     paddingTop: 20,
   },
   postImage: {
-    width: "100%",
-    aspectRatio: 1.5,
+    width: imageWidth,
+    height: imageHeight,
     //borderRadius: 8,
     marginTop: 8,
     alignSelf: "center",

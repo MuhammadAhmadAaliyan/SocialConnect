@@ -10,6 +10,7 @@ import { useNavigation } from "@react-navigation/native";
 //Importing Screens
 import HomeScreen from "./HomeScreen";
 import SettingScreen from "./SettingScreen";
+import LoginScreen from "./LoginScreen";
 
 const Tab = createBottomTabNavigator();
 
@@ -49,7 +50,7 @@ const Tabs = () => {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
-        tabBarIcon: ({ focused, size }) => {
+        tabBarIcon: ({ focused }) => {
           let iconName: any = "";
 
           if (route.name === "HomeScreen") {
@@ -82,7 +83,13 @@ const Tabs = () => {
           tabBarButton: (props) => <CustomTabBarButton {...props} />,
         }}
       />
-      <Tab.Screen name="SettingScreen" component={SettingScreen} />
+      <Tab.Screen name="SettingScreen" component={SettingScreen} options={{
+        headerShown: true,
+        headerTitle: "Settings",
+        headerTitleStyle: {
+          fontFamily: "PoppinsMedium",
+        }
+        }}/>
     </Tab.Navigator>
   );
 };

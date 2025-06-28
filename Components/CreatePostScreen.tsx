@@ -9,8 +9,8 @@ import {
   TextInput,
   ScrollView,
   Alert,
-  BackHandler,
   ActivityIndicator,
+  Dimensions
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFonts } from "expo-font";
@@ -18,6 +18,11 @@ import * as SplashScreen from "expo-splash-screen";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+
+  //Calculate Image dimension
+  const screenWidth = Dimensions.get("window").width;
+  const imageWidth = screenWidth * 0.9;
+  const imageHeight = (screenWidth * 5) / 4;
 
 const CreatePostScreen = ({ navigation }: any) => {
   const [loaded, error] = useFonts({
@@ -74,7 +79,7 @@ const CreatePostScreen = ({ navigation }: any) => {
 
       const result: any = await ImagePicker.launchCameraAsync({
         allowsEditing: true,
-        aspect: [4, 3],
+        aspect: [4, 5],
         quality: 0.7,
       });
 
@@ -100,7 +105,7 @@ const CreatePostScreen = ({ navigation }: any) => {
       const result: any = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
-        aspect: [4, 3],
+        aspect: [4, 5],
         quality: 0.7,
       });
 
@@ -397,9 +402,8 @@ const styles = StyleSheet.create({
     fontFamily: "PoppinsMedium",
   },
   postImage: {
-    width: "100%",
-    aspectRatio: 1.5,
-    //borderRadius: 8,
+    width: imageWidth,
+    height: imageHeight,
     marginTop: "10%",
     alignSelf: "center",
     borderRadius: 15,

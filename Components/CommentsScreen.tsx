@@ -19,6 +19,7 @@ import * as SplashScreen from "expo-splash-screen";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRoute } from "@react-navigation/native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { usePosts } from "../contexts/PostsContext";
 
 const CommentsScreen = () => {
   const [loaded, error] = useFonts({
@@ -33,6 +34,7 @@ const CommentsScreen = () => {
   const [loading, setLoading] = React.useState(true);
 
   const route = useRoute();
+  const posts = usePosts();
 
   const { postId, onCommentAdded } = route.params as { postId: string, onCommentAdded: any};
   const generateId = () =>
@@ -153,17 +155,17 @@ const CommentsScreen = () => {
 
       const newComment = {
         id: generateId(),
-        text: userComment,
+        text: userComment ?? "",
         timestamp: new Date().toISOString(),
         user: {
           name: "You",
-          avatar: profileImage,
+          avatar: profileImage ?? "",
         },
       };
 
       setUserComment("");
       setComments((prev: any) => [newComment, ...prev]);
-      onCommentAdded?.(newComment);
+      posts.addComment(postId, newComment)
       console.log(postId);
       const response = await fetch(`${MOCK_API_COMMENT_URL}/${postId}`, {
         method: "POST",
@@ -204,6 +206,7 @@ const CommentsScreen = () => {
                   data={comments}
                   renderItem={renderItem}
                   keyExtractor={(item) => item.id}
+                  showsVerticalScrollIndicator={false}
                 />
               ) : (
                 <View

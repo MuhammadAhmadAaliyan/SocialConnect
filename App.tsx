@@ -61,96 +61,54 @@ export default function App() {
       <PostProvider>
         <View style={styles.container} onLayout={onLayoutRootView}>
           <NavigationContainer>
-            <Stack.Navigator screenOptions={{ headerShown: false }}>
-              {isLoggedIn ? (
-                <>
-                  <Stack.Screen name="Tabs" component={Tabs} />
-                  <Stack.Screen
-                    name="ProfileScreen"
-                    component={ProfileScreen}
-                  />
-                  <Stack.Screen
-                    name={"CreatePostScreen"}
-                    component={CreatePostScreen}
-                    options={{
-                      headerShown: true,
-                      headerTitle: "Create new Post",
-                      headerTitleStyle: { fontFamily: "PoppinsMedium" },
-                    }}
-                  />
-                  <Stack.Screen
-                    name="UserInfoScreen"
-                    component={UserInfoScreen}
-                    options={{
-                      headerShown: true,
-                      headerTitle: "User Info",
-                      headerTitleStyle: { fontFamily: "PoppinsMedium" },
-                    }}
-                  />
-                  <Stack.Screen
-                    name="CommentsScreen"
-                    component={CommentsScreen}
-                    options={{
-                      headerShown: true,
-                      headerTitle: "Comments",
-                      headerTitleStyle: {
-                        fontFamily: "PoppinsMedium",
-                      },
-                    }}
-                  />
-                </>
-              ) : (
-                <>
-                  <Stack.Screen name="LoginScreen" component={LoginScreen} />
-                  <Stack.Screen name="SignupScreen" component={SignupScreen} />
-                  <Stack.Screen
-                    name="PasswordSetupScreen"
-                    component={PasswordSetupScreen}
-                  />
-                  <Stack.Screen
-                    name="ForgetPasswordScreen"
-                    component={ForgetPasswordScreen}
-                  />
-                  <Stack.Screen
-                    name="ResetPasswordScreen"
-                    component={ResetPasswordScreen}
-                  />
-                  <Stack.Screen name="Tabs" component={Tabs} />
-                  <Stack.Screen
-                    name="ProfileScreen"
-                    component={ProfileScreen}
-                  />
-                  <Stack.Screen
-                    name={"CreatePostScreen"}
-                    component={CreatePostScreen}
-                    options={{
-                      headerShown: true,
-                      headerTitle: "Create new Post",
-                      headerTitleStyle: { fontFamily: "PoppinsMedium" },
-                    }}
-                  />
-                  <Stack.Screen
-                    name="UserInfoScreen"
-                    component={UserInfoScreen}
-                    options={{
-                      headerShown: true,
-                      headerTitle: "User Info",
-                      headerTitleStyle: { fontFamily: "PoppinsMedium" },
-                    }}
-                  />
-                  <Stack.Screen
-                    name="CommentsScreen"
-                    component={CommentsScreen}
-                    options={{
-                      headerShown: true,
-                      headerTitle: "Comments",
-                      headerTitleStyle: {
-                        fontFamily: "PoppinsMedium",
-                      },
-                    }}
-                  />
-                </>
-              )}
+            <Stack.Navigator
+              screenOptions={{ headerShown: false }}
+              initialRouteName={isLoggedIn ? "Tabs" : "LoginScreen"}
+            >
+              {/* Always include all screens */}
+              <Stack.Screen name="LoginScreen" component={LoginScreen} />
+              <Stack.Screen name="SignupScreen" component={SignupScreen} />
+              <Stack.Screen
+                name="PasswordSetupScreen"
+                component={PasswordSetupScreen}
+              />
+              <Stack.Screen
+                name="ForgetPasswordScreen"
+                component={ForgetPasswordScreen}
+              />
+              <Stack.Screen
+                name="ResetPasswordScreen"
+                component={ResetPasswordScreen}
+              />
+              <Stack.Screen name="Tabs" component={Tabs} />
+              <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
+              <Stack.Screen
+                name="CreatePostScreen"
+                component={CreatePostScreen}
+                options={{
+                  headerShown: true,
+                  headerTitle: "Create new Post",
+                  headerTitleStyle: { fontFamily: "PoppinsMedium" },
+                }}
+              />
+              <Stack.Screen
+                name="UserInfoScreen"
+                component={UserInfoScreen}
+                options={{
+                  headerShown: true,
+                  headerTitle: "User Info",
+                  headerTitleStyle: { fontFamily: "PoppinsMedium" },
+                }}
+              />
+              <Stack.Screen
+                name="CommentsScreen"
+                component={CommentsScreen}
+                options={{
+                  headerShown: true,
+                  headerTitle: "Comments",
+                  headerTitleStyle: { fontFamily: "PoppinsMedium" },
+                }}
+              />
             </Stack.Navigator>
           </NavigationContainer>
         </View>

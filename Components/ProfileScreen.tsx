@@ -10,6 +10,7 @@ import {
   Alert,
   TextInput,
   ScrollView,
+  ActivityIndicator,
 } from "react-native";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
@@ -20,7 +21,6 @@ import * as ImagePicker from "expo-image-picker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Formik } from "formik";
 import * as Yup from "yup";
-import { useAuth } from "../contexts/AuthContext";
 
 const ProfileScreen = ({ navigation }: any) => {
   const [loaded, error] = useFonts({
@@ -35,7 +35,7 @@ const ProfileScreen = ({ navigation }: any) => {
   const [modalType, setModalType] = React.useState("");
   const [userName, setuserName] = React.useState<string>("");
   const [bio, setBio] = React.useState<string>("");
-  const auth = useAuth();
+  const [isLoadingModalVisible, setLoadingModalVisible] = React.useState(false);
 
   //MOCK API URL
   const MOCK_API_AUTH_URL =
@@ -54,41 +54,6 @@ const ProfileScreen = ({ navigation }: any) => {
       .required("Name is required."),
     bio: Yup.string().max(100, "Bio can't exceed 100 characters."),
   });
-
-  //Save data into  memory.
-  React.useEffect(() => {
-    let saveData = async () => {
-      try {
-        if (auth.user && auth.user.user) {
-          const userName = auth.user.user.name;
-          const bio = auth.user.user.bio;
-          const profileImage = auth.user.user.avatar;
-          const userId = auth.user.user.id;
-
-          if (userName) {
-            setuserName(userName);
-            await AsyncStorage.setItem("@userName", userName);
-          }
-          if (bio) {
-            setBio(bio);
-            await AsyncStorage.setItem("@bio", bio);
-          }
-          if (profileImage) {
-            setProfileImage(profileImage);
-            await AsyncStorage.setItem("@profileImage", profileImage);
-          }
-          if (userId) {
-            await AsyncStorage.setItem("@userId", userId);
-            console.log(userId);
-          }
-        }
-      } catch (e) {
-        console.log("An error occurred while saving data");
-      }
-    };
-
-    saveData();
-  }, [auth.user]);
 
   //Load data from memory.
   let loadData = async () => {
@@ -135,16 +100,19 @@ const ProfileScreen = ({ navigation }: any) => {
       });
 
       if (!result.canceled) {
+        setLoadingModalVisible(true);
         const uri = result.assets[0].uri;
         setProfileImage(uri);
         await AsyncStorage.setItem("@profileImage", uri);
 
         const secureUrl = await uploadImageToCloudnary(uri);
         await updateProfile({avatar: secureUrl});
+        setLoadingModalVisible(false);
       }
     } catch (e) {
       console.log("An error while taking picture!!");
       console.log(e);
+      setLoadingModalVisible(false);
     }
   };
 
@@ -165,12 +133,14 @@ const ProfileScreen = ({ navigation }: any) => {
       });
 
       if (!result.canceled) {
+        setLoadingModalVisible(true);
         const uri = result.assets[0].uri;
         setProfileImage(uri);
         await AsyncStorage.setItem("@profileImage", uri);
         const secureUrl = await uploadImageToCloudnary(uri);
         console.log(secureUrl);
-        await updateProfile({avatar: secureUrl})
+        await updateProfile({avatar: secureUrl});
+        setLoadingModalVisible(false);
       }
     } catch (e) {
       console.log("An error occurred while choosing image.");
@@ -225,13 +195,16 @@ let uploadImageToCloudnary = async (imageUri: any) => {
           text: "Delete",
           style: "destructive",
           onPress: async () => {
+            setLoadingModalVisible(true);
             try {
               setProfileImage("");
               await AsyncStorage.removeItem("@profileImage");
               await updateProfile({avatar: ""});
+              setLoadingModalVisible(false);
             } catch (e) {
               console.log("An error occurred while deleting");
               console.log(e);
+              setLoadingModalVisible(false);
             }
           },
         },
@@ -242,19 +215,23 @@ let uploadImageToCloudnary = async (imageUri: any) => {
 
   //Save edit function
   let saveEdit = async (newName: string, newBio: string) => {
+    setLoadingModalVisible(true);
     try {
       if(modalType == "Name"){
         setuserName(newName)
         await AsyncStorage.setItem('@userName', newName);
         await updateProfile({name: newName});
+        setLoadingModalVisible(false);
       }else if(modalType == "Bio"){
         const bio = newBio? newBio: "";
         setBio(bio);
         await AsyncStorage.setItem('@bio', bio);
         await updateProfile({bio: bio});
+        setLoadingModalVisible(false);
       }
     } catch (e) {
       console.log("An error occurred while saving", e);
+      setLoadingModalVisible(false);
     }
   };
 
@@ -522,6 +499,18 @@ let uploadImageToCloudnary = async (imageUri: any) => {
           </Formik>
         </View>
       </Modal>
+            <Modal
+              isVisible={isLoadingModalVisible}
+              animationIn={"fadeIn"}
+              animationOut={"fadeOut"}
+            >
+              <View style={styles.modalOverlay}>
+                <View style={styles.loadingModalContent}>
+                  <ActivityIndicator size="large" color="#4F46E5" />
+                  <Text style={styles.modalText}>Updating Profile...</Text>
+                </View>
+              </View>
+            </Modal>
     </SafeAreaView>
   );
 };
@@ -724,5 +713,23 @@ const styles = StyleSheet.create({
     textAlign: "center",
     letterSpacing: 4,
     color: "#ffffff",
+  },
+    modalOverlay: {
+    flex: 1,
+    //backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingModalContent: {
+    backgroundColor: "white",
+    padding: 24,
+    borderRadius: 12,
+    alignItems: "center",
+  },
+  modalText: {
+    marginTop: 12,
+    fontSize: 16,
+    fontFamily: "PoppinsMedium",
+    color: "#333",
   },
 });

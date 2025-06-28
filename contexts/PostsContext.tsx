@@ -3,9 +3,12 @@ import React, { createContext, useState, useContext } from "react";
 // Types
 type CommentType = {
   id: string;
-  userId: string;
   text: string;
-  timeStamp: string;
+  timestamp: string,
+  user: {
+    name: string
+    avatar: string,
+  }
 };
 
 type PostType = {
