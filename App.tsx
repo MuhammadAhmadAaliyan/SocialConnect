@@ -7,6 +7,7 @@ import * as SplashScreen from "expo-splash-screen";
 import { AuthProvider } from "./contexts/AuthContext";
 import { PostProvider } from "./contexts/PostsContext";
 import { useFonts } from "expo-font";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
 //Importing Screens.
 import LoginScreen from "./Components/LoginScreen";
@@ -57,6 +58,7 @@ export default function App() {
   if (!isAppReady || !loaded) return null;
 
   return (
+    <SafeAreaProvider>
     <AuthProvider>
       <PostProvider>
         <View style={styles.container} onLayout={onLayoutRootView}>
@@ -114,6 +116,7 @@ export default function App() {
         </View>
       </PostProvider>
     </AuthProvider>
+    </SafeAreaProvider>
   );
 }
 

@@ -10,7 +10,7 @@ import {
   ScrollView,
   Alert,
   ActivityIndicator,
-  Dimensions
+  Dimensions,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFonts } from "expo-font";
@@ -18,11 +18,16 @@ import * as SplashScreen from "expo-splash-screen";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import {
+  responsiveScreenWidth as wp,
+  responsiveScreenHeight as hp,
+  responsiveFontSize as rf,
+} from "react-native-responsive-dimensions";
 
-  //Calculate Image dimension
-  const screenWidth = Dimensions.get("window").width;
-  const imageWidth = screenWidth * 0.9;
-  const imageHeight = (screenWidth * 5) / 4;
+//Calculate Image dimension
+const screenWidth = Dimensions.get("window").width;
+const imageWidth = screenWidth * 0.9;
+const imageHeight = (screenWidth * 5) / 4;
 
 const CreatePostScreen = ({ navigation }: any) => {
   const [loaded, error] = useFonts({
@@ -182,7 +187,7 @@ const CreatePostScreen = ({ navigation }: any) => {
         console.log("Post created Successfully.");
         isNavigating.current = true;
         setButtonPressed(false);
-        await AsyncStorage.setItem('@shouldRefreshPosts', "true");
+        await AsyncStorage.setItem("@shouldRefreshPosts", "true");
         navigation.reset({
           index: 0,
           routes: [{ name: "Tabs" }],
@@ -249,7 +254,7 @@ const CreatePostScreen = ({ navigation }: any) => {
             maxLength={60}
           />
         </View>
-        <Text style={{ fontSize: 18, fontFamily: "PoppinsBold" }}>
+        <Text style={{ fontSize: rf(2.2), fontFamily: "PoppinsBold" }}>
           Image (Optional):
         </Text>
         {postImage ? (
@@ -261,9 +266,9 @@ const CreatePostScreen = ({ navigation }: any) => {
             />
             <Text
               style={{
-                fontSize: 18,
+                fontSize: rf(2.2),
                 fontFamily: "PoppinsBold",
-                marginTop: "10%",
+                marginTop: hp(5),
               }}
             >
               Edit Image:
@@ -275,15 +280,15 @@ const CreatePostScreen = ({ navigation }: any) => {
                 style={[styles.imageContainer, styles.imageContainer2]}
                 onPress={() => takingPicture()}
               >
-                <Ionicons name={"camera"} size={20} color={"#4F46E5"} />
-                <Text style={[styles.text, { fontSize: 14 }]}>Camera</Text>
+                <Ionicons name={"camera"} size={rf(2.4)} color={"#4F46E5"} />
+                <Text style={[styles.text, { fontSize: rf(1.7) }]}>Camera</Text>
               </Pressable>
               <Pressable
                 style={[styles.imageContainer, styles.imageContainer2]}
                 onPress={() => selectPicture()}
               >
-                <Ionicons name={"image"} size={20} color={"#4F46E5"} />
-                <Text style={[styles.text, { fontSize: 14 }]}>Gallery</Text>
+                <Ionicons name={"image"} size={rf(2.4)} color={"#4F46E5"} />
+                <Text style={[styles.text, { fontSize: rf(1.7) }]}>Gallery</Text>
               </Pressable>
               <Pressable
                 style={[styles.imageContainer, styles.imageContainer2]}
@@ -294,7 +299,7 @@ const CreatePostScreen = ({ navigation }: any) => {
                   size={20}
                   color={"#4F46E5"}
                 />
-                <Text style={[styles.text, { fontSize: 14 }]}>Delete</Text>
+                <Text style={[styles.text, { fontSize: rf(1.7) }]}>Delete</Text>
               </Pressable>
             </View>
           </>
@@ -306,14 +311,14 @@ const CreatePostScreen = ({ navigation }: any) => {
               style={styles.imageContainer}
               onPress={() => takingPicture()}
             >
-              <Ionicons name={"camera"} size={30} color={"#4F46E5"} />
+              <Ionicons name={"camera"} size={rf(3.42)} color={"#4F46E5"} />
               <Text style={styles.text}>Camera</Text>
             </Pressable>
             <Pressable
               style={styles.imageContainer}
               onPress={() => selectPicture()}
             >
-              <Ionicons name={"image"} size={30} color={"#4F46E5"} />
+              <Ionicons name={"image"} size={rf(3.42)} color={"#4F46E5"} />
               <Text style={styles.text}>Gallery</Text>
             </Pressable>
           </View>
@@ -333,7 +338,7 @@ const CreatePostScreen = ({ navigation }: any) => {
           }}
         >
           {isButtonPressed ? (
-            <ActivityIndicator color={"#ffffff"} size={28} />
+            <ActivityIndicator color={"#ffffff"} size={rf(3.5)} />
           ) : (
             <MaterialCommunityIcons
               name={"send"}
@@ -354,70 +359,77 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#ffffff",
-    padding: 10,
+    paddingVertical: hp(1.32),
+    paddingHorizontal: wp(2.78),
   },
   userInfo: {
     flexDirection: "row",
-    gap: 5,
+    gap: wp(1.39),
     alignItems: "center",
   },
   profileImage: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: wp(11.11),
+    height: hp(5.29),
+    borderRadius: hp(2.65),
+    borderWidth: 2,
+    borderColor: '#4F46E5'
   },
   userName: {
     fontFamily: "PoppinsMedium",
-    fontSize: 18,
+    fontSize: rf(2.2),
   },
   input: {
     borderWidth: 1,
     borderColor: "#4F46E5",
-    height: 70,
-    borderRadius: 12,
-    padding: 10,
-    fontSize: 18,
+    height: hp(9.27),
+    borderRadius: hp(1.59),
+    paddingVertical: hp(1.32),
+    paddingHorizontal: wp(2.78),
+    fontSize: rf(2.2),
     fontFamily: "PoppinsRegular",
   },
   postContainer: {
-    paddingVertical: "10%",
+    paddingVertical: hp(5),
   },
   imageContainer: {
     justifyContent: "center",
     alignItems: "center",
-    gap: 6,
-    marginVertical: 10,
-    marginTop: "10%",
+    gap: wp(1.67),
+    marginVertical: hp(1.32),
+    marginTop: hp(5),
     backgroundColor: "#F6F6F6",
-    padding: 20,
-    borderRadius: 15,
-    width: 120,
+    paddingHorizontal: wp(5.56),
+    paddingVertical: hp(2.65),
+    borderRadius: rf(1.99),
+    width: wp(33.33),
   },
   imageContainer2: {
-    padding: 10,
-    width: 100,
+    paddingVertical: hp(1.32),
+    paddingHorizontal: wp(2.78),
+    width: wp(27.78),
   },
   text: {
-    fontSize: 18,
+    fontSize: rf(2.2),
     fontFamily: "PoppinsMedium",
   },
   postImage: {
     width: imageWidth,
     height: imageHeight,
-    marginTop: "10%",
+    marginTop: hp(5),
     alignSelf: "center",
-    borderRadius: 15,
+    borderRadius: hp(1.99),
   },
   sendButton: {
     borderWidth: 1,
     borderColor: "#4F46E5",
     backgroundColor: "#4F46E5",
-    height: 45,
-    padding: 10,
+    height: hp(5.96),
+    paddingVertical: hp(1.32),
+    paddingHorizontal: wp(2.78),
     justifyContent: "center",
     alignItems: "center",
-    borderRadius: 12,
-    marginVertical: "10%",
-    marginTop: "30%",
+    borderRadius: hp(1.59),
+    marginVertical: hp(5),
+    marginTop: hp(15),
   },
 });

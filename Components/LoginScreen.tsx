@@ -10,7 +10,6 @@ import {
   Platform,
   ScrollView,
   ActivityIndicator,
-  Alert,
 } from "react-native";
 import * as SplashScreen from "expo-splash-screen";
 import { useFonts } from "expo-font";
@@ -19,6 +18,10 @@ import * as Yup from "yup";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../contexts/AuthContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import {
+  responsiveScreenHeight as hp,
+  responsiveFontSize as rf,
+} from "react-native-responsive-dimensions";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -101,7 +104,7 @@ const LoginScreen = ({ navigation }: any) => {
       style={{ flex: 1, backgroundColor: "#ffffff" }}
       behavior={Platform.OS === "ios" ? "height" : "padding"}
     >
-      <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
+      <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
         <SafeAreaView style={styles.container}>
           <View style={styles.logo}>
             <Text style={styles.logoText}>Social Connect</Text>
@@ -148,10 +151,10 @@ const LoginScreen = ({ navigation }: any) => {
                     <TextInput
                       style={{
                         flex: 1,
-                        fontSize: 18,
+                        fontSize: rf(2.2),
                         fontFamily: "PoppinsRegular",
                         textAlignVertical: "center",
-                        height: 45,
+                        height: hp(5.96),
                       }}
                       keyboardType={"default"}
                       placeholder={"Password"}
@@ -162,8 +165,8 @@ const LoginScreen = ({ navigation }: any) => {
                     />
                     <Ionicons
                       name={isPasswordVisible ? "eye-off" : "eye"}
-                      size={20}
-                      style={{ paddingLeft: 5, color: "#4F46E5" }}
+                      size={rf(2.4)}
+                      style={{ paddingLeft: hp(0.66), color: "#4F46E5" }}
                       onPress={() => setPasswordVisible(!isPasswordVisible)}
                     />
                   </View>
@@ -191,7 +194,7 @@ const LoginScreen = ({ navigation }: any) => {
                   disabled={isButtonPressed}
                 >
                   {isButtonPressed ? (
-                    <ActivityIndicator color={"#ffffff"} size={28} />
+                    <ActivityIndicator color={"#ffffff"} size={rf(3.5)} />
                   ) : (
                     <Text style={styles.loginButtonText}>Login</Text>
                   )}
@@ -200,13 +203,13 @@ const LoginScreen = ({ navigation }: any) => {
             )}
           </Formik>
           <View style={styles.signup}>
-            <Text style={{ fontSize: 18, fontFamily: "PoppinsRegular" }}>
+            <Text style={{ fontSize: rf(2.2), fontFamily: "PoppinsRegular" }}>
               Doesn't have an account?
             </Text>
             <Pressable onPress={() => navigation.navigate("SignupScreen")}>
               <Text
                 style={{
-                  fontSize: 18,
+                  fontSize: rf(2.2),
                   fontFamily: "PoppinsBold",
                   color: "#4F46E5",
                 }}
@@ -226,68 +229,68 @@ export default LoginScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: "6%",
+    padding: hp(3),
   },
   logo: {
-    paddingTop: "24%",
+    paddingTop: hp(12),
     justifyContent: "center",
   },
   logoText: {
     fontFamily: "DancingScriptBold",
-    fontSize: 42,
+    fontSize: rf(5.2),
     letterSpacing: 6,
     textAlign: "center",
   },
   welcomeArea: {
-    paddingTop: "22%",
+    paddingTop: hp(8),
     justifyContent: "center",
   },
   welcome: {
-    fontSize: 30,
+    fontSize: rf(3.8),
     fontFamily: "PoppinsMedium",
     letterSpacing: 6,
     textAlign: "center",
   },
   loginText: {
-    fontSize: 20,
+    fontSize: rf(2.5),
     fontFamily: "PoppinsRegular",
     textAlign: "center",
-    paddingVertical: "6%",
-    paddingBottom: "12%",
+    paddingVertical: hp(3),
+    paddingBottom: hp(6),
   },
   inputContainer: {
-    marginBottom: "10%",
+    marginBottom: hp(5),
   },
   input: {
     borderWidth: 1,
     borderColor: "#4F46E5",
-    height: 45,
-    padding: 8,
-    fontSize: 18,
-    borderRadius: 12,
+    height: hp(5.96),
+    padding: hp(1.06),
+    fontSize: rf(2.2),
+    borderRadius: hp(1.6),
     fontFamily: "PoppinsRegular",
     alignItems: "center",
   },
   passwordInput: {
     borderWidth: 1,
     borderColor: "#4F46E5",
-    height: 45,
-    borderRadius: 12,
+    height: hp(5.96),
+    borderRadius: hp(1.6),
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 8,
+    paddingHorizontal: hp(1.06),
   },
   error: {
     color: "red",
     fontFamily: "PoppinsRegular",
-    fontSize: 12,
+    fontSize: rf(1.5),
   },
   forgetButton: {
-    paddingVertical: 16,
+    paddingVertical: hp(2.12),
   },
   forgetText: {
-    fontSize: 16,
+    fontSize: rf(2),
     fontFamily: "PoppinsRegular",
     textAlign: "center",
   },
@@ -295,29 +298,29 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#4F46E5",
     backgroundColor: "#4F46E5",
-    padding: 10,
-    height: 50,
-    borderRadius: 12,
+    padding: hp(1.32),
+    height: hp(6.62),
+    borderRadius: hp(1.59),
     justifyContent: "center",
-    top: "10%",
+    top: hp(5),
   },
   loginButtonText: {
-    fontSize: 22,
+    fontSize: rf(2.8),
     fontFamily: "PoppinsBold",
     textAlign: "center",
     letterSpacing: 4,
     color: "#ffffff",
   },
   signup: {
-    top: "14%",
+    top: hp(7),
     flexDirection: "row",
     justifyContent: "center",
   },
   incorrectCrendentials: {
-    fontSize: 18,
+    fontSize: rf(2.2),
     fontFamily: "PoppinsMedium",
     color: "red",
     textAlign: "center",
-    paddingBottom: 8,
+    paddingBottom: hp(1.06),
   },
 });

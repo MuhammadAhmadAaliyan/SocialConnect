@@ -6,11 +6,17 @@ import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import {
+  responsiveScreenWidth as wp,
+  responsiveScreenHeight as hp,
+  responsiveFontSize as rf,
+} from "react-native-responsive-dimensions";
 
 //Importing Screens
 import HomeScreen from "./HomeScreen";
 import SettingScreen from "./SettingScreen";
-import LoginScreen from "./LoginScreen";
+
 
 const Tab = createBottomTabNavigator();
 
@@ -36,6 +42,7 @@ const Tabs = () => {
     PoppinsRegular: require("../assets/fonts/Poppins-Regular.ttf"),
     PoppinsBold: require("../assets/fonts/Poppins-Bold.ttf"),
   });
+  const insets = useSafeAreaInsets();
 
   React.useEffect(() => {
     if (loaded || error) {
@@ -58,7 +65,7 @@ const Tabs = () => {
           } else if (route.name === "SettingScreen") {
             iconName = focused ? "settings" : "settings-outline";
           }
-          return <Ionicons name={iconName} size={28} color={"#4F46E5"} />;
+          return <Ionicons name={iconName} size={rf(3.43)} color={"#4F46E5"} />;
         },
         headerShown: false,
         tabBarShowLabel: false,
@@ -66,9 +73,9 @@ const Tabs = () => {
           <Pressable {...props} android_ripple={null} />
         ),
         tabBarStyle: {
-          height: 60,
+          height: insets.bottom + hp(7.94),
           backgroundColor: "#fff",
-          paddingTop: 10
+          paddingTop: hp(1.32)
         },
       })}
     >
@@ -78,7 +85,7 @@ const Tabs = () => {
         component={DummyScreen}
         options={{
           tabBarIcon: () => (
-            <MaterialCommunityIcons name="plus" size={28} color="#fff" />
+            <MaterialCommunityIcons name="plus" size={rf(3.43)} color="#fff" />
           ),
           tabBarButton: (props) => <CustomTabBarButton {...props} />,
         }}
@@ -107,12 +114,12 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   plusButton: {
-    width: 40,
-    height: 40,
+    width: wp(11.11),
+    height: hp(5.29),
     borderRadius: 30,
     backgroundColor: "#4F46E5",
     justifyContent: "center",
     alignItems: "center",
-    top: 10
+    top: hp(1.32)
   },
 });

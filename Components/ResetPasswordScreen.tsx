@@ -18,6 +18,10 @@ import { Formik } from "formik";
 import * as Yup from "yup";
 import { Ionicons } from "@expo/vector-icons";
 import { useRoute } from "@react-navigation/native";
+import {
+  responsiveScreenHeight as hp,
+  responsiveFontSize as rf,
+} from 'react-native-responsive-dimensions';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -128,15 +132,15 @@ const ResetPasswordScreen = ({ navigation }: any) => {
               touched,
             }) => (
               <>
-                <View style={{ marginBottom: "10%" }}>
+                <View style={{ marginBottom: hp(5) }}>
                   <View style={styles.passwordInput}>
                     <TextInput
                       style={{
                         flex: 1,
-                        fontSize: 18,
+                        fontSize: rf(2.2),
                         fontFamily: "PoppinsRegular",
                         textAlignVertical: "center",
-                        height: 45,
+                        height: hp(6.62),
                       }}
                       keyboardType={"default"}
                       placeholder={"New Password"}
@@ -147,8 +151,8 @@ const ResetPasswordScreen = ({ navigation }: any) => {
                     />
                     <Ionicons
                       name={isPasswordVisible ? "eye-off" : "eye"}
-                      size={20}
-                      style={{ paddingLeft: 5, color: "#4F46E5" }}
+                      size={rf(2.4)}
+                      style={{ paddingLeft: hp(0.66), color: "#4F46E5" }}
                       onPress={() => setPasswordVisible(!isPasswordVisible)}
                     />
                   </View>
@@ -161,10 +165,10 @@ const ResetPasswordScreen = ({ navigation }: any) => {
                     <TextInput
                       style={{
                         flex: 1,
-                        fontSize: 18,
+                        fontSize: rf(2.2),
                         fontFamily: "PoppinsRegular",
                         textAlignVertical: "center",
-                        height: 45,
+                        height: hp(6.62),
                       }}
                       keyboardType={"default"}
                       placeholder={"Confirm Password"}
@@ -175,8 +179,8 @@ const ResetPasswordScreen = ({ navigation }: any) => {
                     />
                     <Ionicons
                       name={isConfirmPasswordVisible ? "eye-off" : "eye"}
-                      size={20}
-                      style={{ paddingLeft: 5, color: "#4F46E5" }}
+                      size={rf(2.4)}
+                      style={{ paddingLeft: hp(0.66), color: "#4F46E5" }}
                       onPress={() =>
                         setConfirmPasswordVisible(!isConfirmPasswordVisible)
                       }
@@ -198,7 +202,7 @@ const ResetPasswordScreen = ({ navigation }: any) => {
                   disabled={isButtonPressed}
                 >
                   {isButtonPressed ? (
-                    <ActivityIndicator color={"#ffffff"} size={28} />
+                    <ActivityIndicator color={"#ffffff"} size={rf(3.5)} />
                   ) : (
                     <Text style={styles.doneButtonText}>Done</Text>
                   )}
@@ -217,56 +221,56 @@ export default ResetPasswordScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: "6%",
+    padding: hp(3),
   },
   logo: {
-    paddingTop: "24%",
+    paddingTop: hp(12),
     justifyContent: "center",
   },
   logoText: {
     fontFamily: "DancingScriptBold",
-    fontSize: 42,
+    fontSize: rf(5.2),
     letterSpacing: 6,
     textAlign: "center",
   },
   TextArea: {
-    paddingTop: "22%",
+    paddingTop: hp(11),
     justifyContent: "center",
   },
   guidanceText: {
-    fontSize: 30,
+    fontSize: rf(3.8),
     fontFamily: "PoppinsMedium",
     letterSpacing: 6,
     textAlign: "center",
-    paddingBottom: "18%",
+    paddingBottom: hp(9)
   },
   passwordInput: {
     borderWidth: 1,
     borderColor: "#4F46E5",
-    height: 45,
-    borderRadius: 12,
+    height: hp(5.96),
+    borderRadius: hp(1.6),
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 8,
+    paddingHorizontal: hp(1.06),
   },
   error: {
     color: "red",
     fontFamily: "PoppinsRegular",
-    fontSize: 12,
+    fontSize: rf(1.5),
   },
   doneButton: {
     borderWidth: 1,
     borderColor: "#4F46E5",
     backgroundColor: "#4F46E5",
-    padding: 10,
-    height: 50,
-    borderRadius: 12,
+    padding: hp(1.32),
+    height: hp(6.62),
+    borderRadius: hp(1.59),
     justifyContent: "center",
-    top: "10%",
+    top: hp(5),
   },
   doneButtonText: {
-    fontSize: 22,
+    fontSize: rf(2.8),
     fontFamily: "PoppinsBold",
     textAlign: "center",
     letterSpacing: 4,

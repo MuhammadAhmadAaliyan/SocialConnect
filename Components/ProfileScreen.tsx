@@ -21,6 +21,11 @@ import * as ImagePicker from "expo-image-picker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Formik } from "formik";
 import * as Yup from "yup";
+import {
+  responsiveScreenWidth as wp,
+  responsiveScreenHeight as hp,
+  responsiveFontSize as rf,
+} from "react-native-responsive-dimensions";
 
 const ProfileScreen = ({ navigation }: any) => {
   const [loaded, error] = useFonts({
@@ -272,7 +277,7 @@ let uploadImageToCloudnary = async (imageUri: any) => {
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
-          <Ionicons name={"arrow-back"} size={20} color={"#ffffff"} />
+          <Ionicons name={"arrow-back"} size={rf(2.65)} color={"#ffffff"} />
         </Pressable>
         <Text style={styles.logo}>Social Connect</Text>
         {profileImage ? (
@@ -314,17 +319,17 @@ let uploadImageToCloudnary = async (imageUri: any) => {
               style={styles.editButton}
               onPress={() => setPModalVisible(true)}
             >
-              <MaterialIcons name={"edit"} size={20} color={"#ffffff"} />
+              <MaterialIcons name={"edit"} size={rf(2.65)} color={"#ffffff"} />
             </Pressable>
           </View>
-          <Text style={{ fontSize: 22, fontFamily: "PoppinsMedium" }}>
+          <Text style={{ fontSize: rf(2.8), fontFamily: "PoppinsMedium" }}>
             Name:
           </Text>
           <View style={styles.infoContainer}>
             <Text style={styles.info}>{userName}</Text>
             <MaterialIcons
               name={"edit"}
-              size={20}
+              size={rf(2.65)}
               style={{ alignSelf: "center" }}
               onPress={() => {
                 setInfoModalVisible(true);
@@ -332,7 +337,7 @@ let uploadImageToCloudnary = async (imageUri: any) => {
               }}
             />
           </View>
-          <Text style={{ fontSize: 22, fontFamily: "PoppinsMedium" }}>
+          <Text style={{ fontSize: rf(2.8), fontFamily: "PoppinsMedium" }}>
             Bio:
           </Text>
           <View style={styles.infoContainer}>
@@ -344,7 +349,7 @@ let uploadImageToCloudnary = async (imageUri: any) => {
             </Text>
             <MaterialIcons
               name={"edit"}
-              size={20}
+              size={rf(2.65)}
               onPress={() => {
                 setInfoModalVisible(true);
                 setModalType("Bio");
@@ -366,7 +371,7 @@ let uploadImageToCloudnary = async (imageUri: any) => {
           <View style={styles.handleBar} />
           <View style={styles.modalHeader}>
             <Pressable onPress={() => setPModalVisible(false)}>
-              <Ionicons name="close" size={26} color="black" />
+              <Ionicons name="close" size={rf(3.42)} color="black" />
             </Pressable>
             <Text style={styles.title}>Profile photo</Text>
             <Pressable
@@ -378,7 +383,7 @@ let uploadImageToCloudnary = async (imageUri: any) => {
             >
               <MaterialIcons
                 name="delete-outline"
-                size={24}
+                size={rf(3.42)}
                 color={!profileImage ? "#D3D3D3" : "black"}
               />
             </Pressable>
@@ -391,7 +396,7 @@ let uploadImageToCloudnary = async (imageUri: any) => {
                 setPModalVisible(false);
               }}
             >
-              <Ionicons name="camera" size={26} color="#4F46E5" />
+              <Ionicons name="camera" size={rf(3.42)} color="#4F46E5" />
               <Text style={styles.optionText}>Camera</Text>
             </TouchableOpacity>
 
@@ -402,7 +407,7 @@ let uploadImageToCloudnary = async (imageUri: any) => {
                 setPModalVisible(false);
               }}
             >
-              <Ionicons name="image" size={26} color="#4F46E5" />
+              <Ionicons name="image" size={rf(3.42)} color="#4F46E5" />
               <Text style={styles.optionText}>Gallery</Text>
             </TouchableOpacity>
           </View>
@@ -433,7 +438,7 @@ let uploadImageToCloudnary = async (imageUri: any) => {
               touched,
             }) => (
               <>
-                <Text style={{ fontSize: 20, fontFamily: "PoppinsMedium" }}>
+                <Text style={{ fontSize: rf(2.65), fontFamily: "PoppinsMedium" }}>
                   Edit {modalType}:
                 </Text>
                 {modalType == "Name" && (
@@ -523,8 +528,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffffff",
   },
   header: {
-    padding: "4%",
-    paddingTop: "12%",
+    paddingVertical: hp(2),
+    paddingHorizontal: wp(2),
+    paddingTop: hp(6),
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
@@ -532,80 +538,82 @@ const styles = StyleSheet.create({
   logo: {
     fontFamily: "DancingScriptBold",
     color: "#4F46E5",
-    fontSize: 26,
+    fontSize: rf(3.3),
     letterSpacing: 6,
   },
   backButton: {
     borderWidth: 1,
     borderColor: "#4F46E5",
     backgroundColor: "#4F46E5",
-    height: 45,
-    width: 45,
+    height: hp(5.95),
+    width: wp(12.5),
     justifyContent: "center",
     alignItems: "center",
-    borderRadius: 30,
+    borderRadius: hp(3.97),
   },
   avatar: {
-    width: 45,
-    height: 45,
+    width: wp(12.5),
+    height: hp(5.95),
     borderWidth: 2,
     borderColor: "#4F46E5",
-    borderRadius: 30,
+    borderRadius: hp(3.97),
   },
   profileArea: {
-    padding: "4%",
+    paddingVertical: hp(2),
+    paddingHorizontal: hp(2)
   },
   profileText: {
-    fontSize: 26,
+    fontSize: rf(3.3),
     fontFamily: "PoppinsRegular",
     letterSpacing: 4,
     textAlign: "center",
-    paddingTop: "8%",
+    paddingTop: hp(4),
   },
   profileImageContainer: {
-    marginBottom: "12%",
+    marginBottom: hp(6),
   },
   profileImage: {
-    width: 140,
-    height: 140,
-    borderRadius: 70,
+    width: wp(38.88),
+    height: hp(18.53),
+    borderRadius: hp(10),
     borderWidth: 2,
     borderColor: "#4F46E5",
     alignSelf: "center",
-    marginTop: "8%",
+    marginTop: hp(4),
   },
   editButton: {
     position: "absolute",
     borderWidth: 1,
     borderColor: "#4F46E5",
     backgroundColor: "#4F46E5",
-    height: 45,
-    width: 45,
+    width: wp(12.5),
+    height: hp(5.95),
     justifyContent: "center",
     alignItems: "center",
-    borderRadius: 30,
+    borderRadius: hp(3.97),
     bottom: 0,
-    right: "30%",
+    right: wp(27),
   },
   infoContainer: {
     flexDirection: "row",
     borderWidth: 1,
     borderColor: "#4F46E5",
-    borderRadius: 15,
-    marginVertical: "6%",
-    padding: 10,
+    borderRadius: hp(1.98),
+    marginVertical: hp(3),
+    paddingHorizontal: wp(2.77),
+    paddingVertical: hp(1.32),
     alignItems: "flex-start",
     justifyContent: "space-between",
     flexWrap: "nowrap",
   },
   info: {
-    fontSize: 20,
+    fontSize: rf(2.64),
     fontFamily: "PoppinsRegular",
     flexShrink: 1,
     flexGrow: 1,
     flex: 1,
     flexWrap: "wrap",
-    paddingRight: 10,
+    paddingRight: wp(2.77),
   },
   modal: {
     justifyContent: "flex-end",
@@ -613,11 +621,12 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     backgroundColor: "#ffffff",
-    padding: 20,
+    paddingVertical: hp(2.64),
+    paddingHorizontal: wp(5.55),
     borderWidth: 1,
     borderColor: "#F6F6F6",
-    borderTopLeftRadius: 35,
-    borderTopRightRadius: 35,
+    borderTopLeftRadius: hp(4.63),
+    borderTopRightRadius: hp(4.63),
 
     //Shadow for iOS
     shadowColor: "#000",
@@ -629,21 +638,21 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   handleBar: {
-    width: 50,
-    height: 5,
-    borderRadius: 3,
+    width: wp(13.88),
+    height: hp(0.66),
+    borderRadius: hp(0.39),
     backgroundColor: "#ccc",
     alignSelf: "center",
-    marginBottom: 10,
+    marginBottom: hp(1.32),
   },
   modalHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 20,
+    marginBottom: hp(2.64),
   },
   title: {
-    fontSize: 18,
+    fontSize: rf(2.2),
     fontFamily: "PoppinsBold",
     color: "#000",
   },
@@ -654,12 +663,13 @@ const styles = StyleSheet.create({
   optionBox: {
     alignItems: "center",
     backgroundColor: "#F6F6F6",
-    padding: 20,
-    borderRadius: 15,
+    paddingVertical: hp(2.64),
+    paddingHorizontal: wp(2.64),
+    borderRadius: hp(1.98),
     width: 100,
   },
   optionText: {
-    marginTop: 10,
+    marginTop: hp(1.32),
     fontFamily: "PoppinsRegular",
   },
   infoModal: {
@@ -668,28 +678,28 @@ const styles = StyleSheet.create({
     margin: 0,
   },
   infoModalContent: {
-    width: "80%",
+    width: wp(80),
     backgroundColor: "#ffffff",
-    borderRadius: 20,
-    padding: 10,
-    paddingHorizontal: 20,
-    paddingTop: 15,
+    borderRadius: hp(2.64),
+    padding: hp(1.32),
+    paddingHorizontal: wp(5.55),
+    paddingTop: hp(1.98),
   },
   error: {
     color: "red",
     fontFamily: "PoppinsRegular",
-    fontSize: 12,
+    fontSize: rf(1.58),
   },
   inputContainer: {
-    paddingVertical: "6%",
+    paddingVertical: hp(3),
   },
   input: {
     borderWidth: 1,
     borderColor: "#4F46E5",
-    height: 45,
-    padding: 8,
-    fontSize: 18,
-    borderRadius: 12,
+    height: hp(5.96),
+    padding: hp(1.05),
+    fontSize: rf(2.37),
+    borderRadius: hp(1.58),
     fontFamily: "PoppinsRegular",
   },
   inputLength: {
@@ -701,14 +711,14 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#4F46E5",
     backgroundColor: "#4F46E5",
-    padding: 10,
-    height: 50,
-    borderRadius: 12,
+    padding: hp(1.32),
+    height: hp(6.61),
+    borderRadius: hp(1.58),
     justifyContent: "center",
-    marginVertical: "5%",
+    marginVertical: hp(3.77),
   },
   saveButtonText: {
-    fontSize: 22,
+    fontSize: rf(2.9),
     fontFamily: "PoppinsBold",
     textAlign: "center",
     letterSpacing: 4,
@@ -722,13 +732,13 @@ const styles = StyleSheet.create({
   },
   loadingModalContent: {
     backgroundColor: "white",
-    padding: 24,
-    borderRadius: 12,
+    padding: hp(3.17),
+    borderRadius: hp(1.58),
     alignItems: "center",
   },
   modalText: {
-    marginTop: 12,
-    fontSize: 16,
+    marginTop: hp(1.58),
+    fontSize: rf(2.1),
     fontFamily: "PoppinsMedium",
     color: "#333",
   },

@@ -13,6 +13,7 @@ import {
   TouchableWithoutFeedback,
   Platform,
   Keyboard,
+  Dimensions
 } from "react-native";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
@@ -20,6 +21,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRoute } from "@react-navigation/native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { usePosts } from "../contexts/PostsContext";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const CommentsScreen = () => {
   const [loaded, error] = useFonts({
@@ -32,11 +34,12 @@ const CommentsScreen = () => {
   const [userComment, setUserComment] = React.useState<string>();
   const [comments, setComments] = React.useState<any>();
   const [loading, setLoading] = React.useState(true);
+  const insets = useSafeAreaInsets();
 
   const route = useRoute();
   const posts = usePosts();
 
-  const { postId, onCommentAdded } = route.params as { postId: string, onCommentAdded: any};
+  const { postId } = route.params as { postId: string};
   const generateId = () =>
     Date.now().toString(36) + Math.random().toString(36).substring(2);
 
@@ -191,12 +194,14 @@ const CommentsScreen = () => {
     }
   };
 
+  const screenHeight = Dimensions.get("window").height;
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#ffffff" }}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={70}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? insets.top + 40: screenHeight * 0.1}
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <View style={{ flex: 1 }}>
@@ -229,7 +234,7 @@ const CommentsScreen = () => {
               )}
             </View>
             <View style={styles.borderLine} />
-            <View style={styles.userCommentContainer}>
+            <View style={[styles.userCommentContainer, {height: insets.bottom + 30}]}>
               <TextInput
                 value={userComment}
                 onChangeText={(text) => setUserComment(text)}

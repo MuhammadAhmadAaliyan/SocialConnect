@@ -6,11 +6,16 @@ import {
   StyleSheet,
   Image,
   ScrollView,
-  ActivityIndicator
+  ActivityIndicator,
 } from "react-native";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import { useRoute } from "@react-navigation/native";
+import {
+  responsiveScreenWidth as wp,
+  responsiveScreenHeight as hp,
+  responsiveFontSize as rf,
+} from "react-native-responsive-dimensions";
 
 const UserInfoScreen = () => {
   const [loaded, error] = useFonts({
@@ -29,17 +34,17 @@ const UserInfoScreen = () => {
   const MOCK_API_USER_URL =
     "https://socialconnect-backend-production.up.railway.app/users";
 
-//fetch user Info.
-React.useEffect(() => {
+  //fetch user Info.
+  React.useEffect(() => {
     let fetchUserInfo = async () => {
-    try{
-        const {userId} = route.params as {userId: string};
+      try {
+        const { userId } = route.params as { userId: string };
 
         const response = await fetch(MOCK_API_USER_URL);
 
-        if(!response.ok){
-            console.log("Unable to fetch users.");
-            return;
+        if (!response.ok) {
+          console.log("Unable to fetch users.");
+          return;
         }
 
         const data = await response.json();
@@ -48,15 +53,15 @@ React.useEffect(() => {
         setuserName(user.name);
         setProfileImage(user.avatar);
         setBio(user.bio);
-    }catch(e){
+      } catch (e) {
         console.log("An error occurred while fetching user info.");
-    }finally{
+      } finally {
         setLoading(false);
-    }
-}
+      }
+    };
 
-fetchUserInfo();
-}, []);
+    fetchUserInfo();
+  }, []);
 
   React.useEffect(() => {
     if (loaded || error) {
@@ -70,11 +75,11 @@ fetchUserInfo();
 
   if (loading)
     return (
-      <View style={{backgroundColor: '#ffffff', flex: 1}}>
+      <View style={{ backgroundColor: "#ffffff", flex: 1 }}>
         <ActivityIndicator
           size={"large"}
           color={"#4F46E5"}
-          style={{ marginTop: 100 }}
+          style={{ marginTop: hp(13.2) }}
         />
       </View>
     );
@@ -83,10 +88,10 @@ fetchUserInfo();
     <SafeAreaView style={styles.container}>
       <View
         style={{
-          height: 1,
+          height: hp(0.13),
           backgroundColor: "#E0E0E0",
           shadowColor: "#000",
-          shadowOffset: { width: 0, height: 1 },
+          shadowOffset: { width: 0, height: hp(0.13) },
           shadowOpacity: 0.08,
           shadowRadius: 1,
           elevation: 1,
@@ -108,13 +113,13 @@ fetchUserInfo();
               />
             )}
           </View>
-          <Text style={{ fontSize: 22, fontFamily: "PoppinsMedium" }}>
+          <Text style={{ fontSize: rf(2.8), fontFamily: "PoppinsMedium" }}>
             Name:
           </Text>
           <View style={styles.infoContainer}>
             <Text style={styles.info}>{userName}</Text>
           </View>
-          <Text style={{ fontSize: 22, fontFamily: "PoppinsMedium" }}>
+          <Text style={{ fontSize: rf(2.8), fontFamily: "PoppinsMedium" }}>
             Bio:
           </Text>
           <View style={styles.infoContainer}>
@@ -139,46 +144,47 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffffff",
   },
   profileArea: {
-    padding: "4%",
+    paddingHorizontal: wp(4),
+    paddingVertical: hp(4),
   },
   profileText: {
     fontSize: 26,
     fontFamily: "PoppinsRegular",
     letterSpacing: 4,
     textAlign: "center",
-    paddingTop: "8%",
+    paddingTop: hp(4),
   },
   profileImageContainer: {
-    marginBottom: "12%",
+    marginBottom: hp(6),
   },
   profileImage: {
-    width: 140,
-    height: 140,
-    borderRadius: 70,
+    width: wp(38.88),
+    height: hp(18.53),
+    borderRadius: hp(10),
     borderWidth: 2,
     borderColor: "#4F46E5",
     alignSelf: "center",
-    marginTop: "8%",
+    marginTop: hp(4),
   },
   infoContainer: {
     flexDirection: "row",
     borderWidth: 1,
     borderColor: "#4F46E5",
-    borderRadius: 15,
-    marginVertical: "6%",
-    padding: 10,
+    borderRadius: hp(1.99),
+    marginVertical: hp(3),
+    paddingVertical: hp(1.32),
+    paddingHorizontal: wp(2.78),
     alignItems: "flex-start",
     justifyContent: "space-between",
     flexWrap: "nowrap",
   },
   info: {
-    fontSize: 20,
+    fontSize: rf(2.45),
     fontFamily: "PoppinsRegular",
     flexShrink: 1,
     flexGrow: 1,
     flex: 1,
     flexWrap: "wrap",
-    paddingRight: 10,
+    paddingRight: wp(2.78),
   },
-
 });

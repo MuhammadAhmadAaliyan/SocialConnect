@@ -14,6 +14,11 @@ import * as SplashScreen from "expo-splash-screen";
 import { useFonts } from "expo-font";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useAuth } from "../contexts/AuthContext";
+import {
+  responsiveScreenWidth as wp,
+  responsiveScreenHeight as hp,
+  responsiveFontSize as rf,
+} from "react-native-responsive-dimensions";
 
 const SettingScreen = ({ navigation }: any) => {
   const [loaded, error] = useFonts({
@@ -112,7 +117,7 @@ const SettingScreen = ({ navigation }: any) => {
         handleLogout();
         setModalText("Logging out...");
         }}>
-        <MaterialCommunityIcons name={"logout"} size={26} color={"#4F46E5"} />
+        <MaterialCommunityIcons name={"logout"} size={rf(3.25)} color={"#4F46E5"} />
         <Text style={styles.buttonText}>Log out</Text>
       </Pressable>
       <View style={styles.borderLine} />
@@ -120,7 +125,7 @@ const SettingScreen = ({ navigation }: any) => {
         handleDelete();
         setModalText("Deleting Account...");
         }}>
-        <MaterialCommunityIcons name={"delete"} size={26} color={"#4F46E5"} />
+        <MaterialCommunityIcons name={"delete"} size={rf(3.25)} color={"#4F46E5"} />
         <Text style={[styles.buttonText, { color: "red" }]}>
           Delete Account
         </Text>
@@ -153,12 +158,13 @@ const styles = StyleSheet.create({
   button: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: "4%",
-    padding: "4%",
+    marginTop: hp(2),
+    paddingVertical: hp(2),
+    paddingHorizontal: wp(2),
     gap: 6,
   },
   buttonText: {
-    fontSize: 20,
+    fontSize: rf(2.45),
     fontFamily: "PoppinsRegular",
   },
   borderLine: {
@@ -169,7 +175,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.08,
     shadowRadius: 0.5,
     elevation: 0.5,
-    //marginBottom: 10,
   },
   modalOverlay: {
     flex: 1,
@@ -179,13 +184,14 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     backgroundColor: "white",
-    padding: 24,
-    borderRadius: 12,
+    paddingVertical: hp(3.18),
+    paddingHorizontal: wp(4.18),
+    borderRadius: rf(1.59),
     alignItems: "center",
   },
   modalText: {
-    marginTop: 12,
-    fontSize: 16,
+    marginTop: hp(1.59),
+    fontSize: rf(2.11),
     fontFamily: "PoppinsMedium",
     color: "#333",
   },

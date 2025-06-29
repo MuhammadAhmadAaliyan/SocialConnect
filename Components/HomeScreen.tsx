@@ -9,20 +9,19 @@ import {
   FlatList,
   ActivityIndicator,
   RefreshControl,
-  Dimensions,
 } from "react-native";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { usePosts } from "../contexts/PostsContext";
 import { useAuth } from "../contexts/AuthContext";
-
-  //Calculate Image dimension
-  const screenWidth = Dimensions.get("window").width;
-  const imageWidth = screenWidth * 0.9;
-  const imageHeight = (screenWidth * 5) / 4;
+import Post from "./Post";
+import {
+  responsiveScreenWidth as wp,
+  responsiveScreenHeight as hp,
+  responsiveFontSize as rf,
+} from 'react-native-responsive-dimensions';
 
 const HomeScreen = ({ navigation }: any) => {
   const [loaded, error] = useFonts({
@@ -164,108 +163,14 @@ const HomeScreen = ({ navigation }: any) => {
   }
 
   let renderItem = ({ item }: any) => (
-    <View style={styles.card}>
-      <View style={styles.userRow}>
-        <Pressable
-          onPress={() => {
-            console.log(item.user.id);
-            navigation.navigate("UserInfoScreen", { userId: item.user.id });
-          }}
-        >
-          <Image
-            source={
-              item.user.avatar
-                ? { uri: item.user.avatar }
-                : require("../assets/Default Avatar.jpg")
-            }
-            style={[styles.avatar, { height: 40, width: 40 }]}
-          />
-        </Pressable>
-        <View style={styles.userInfo}>
-          <Text style={styles.userName}>
-            {item.user.id == userId ? "You" : item.user.name}
-          </Text>
-          <Text style={styles.timeStamp}>
-            {new Date(item.timestamp).toLocaleString()}
-          </Text>
-        </View>
-      </View>
-      <View style={styles.postSection}>
-        {item.text ? <Text style={styles.postText}>{item.text}</Text> : null}
-        {typeof item.image === "string" && item.image !== "" ? (
-          <Image
-            source={{ uri: item.image }}
-            resizeMode="cover"
-            style={styles.postImage}
-          />
-        ) : null}
-      </View>
-      <View style={styles.counter}>
-        <View style={{ flexDirection: "row", gap: "20%" }}>
-          <Text style={styles.counterText}>
-            {formatCount(item.likedBy.length)} Likes
-          </Text>
-          <Text style={styles.counterText}>
-            {formatCount(item.unlikedBy.length)} Unlikes
-          </Text>
-        </View>
-        <Text style={styles.counterText}>
-          {formatCount(item.comments.length)} Comments
-        </Text>
-      </View>
-      <View style={styles.Button}>
-        <View style={{ flexDirection: "row", gap: "25%" }}>
-          <Pressable
-            onPress={() => {
-              likePost(item.id, userId);
-            }}
-          >
-            <MaterialCommunityIcons
-              name={
-                item.likedBy.includes(userId) ? "thumb-up" : "thumb-up-outline"
-              }
-              size={30}
-              color={"#4F46E5"}
-            />
-          </Pressable>
-          <Pressable onPress={() => unlikePost(item.id, userId)}>
-            <MaterialCommunityIcons
-              name={
-                item.unlikedBy.includes(userId)
-                  ? "thumb-down"
-                  : "thumb-down-outline"
-              }
-              size={30}
-              color={"#4F46E5"}
-            />
-          </Pressable>
-        </View>
-        <Pressable
-          onPress={() => {
-            navigation.navigate("CommentsScreen", { postId: item.id });
-            console.log(item.id);
-          }}
-        >
-          <MaterialCommunityIcons
-            name={"comment-text"}
-            size={30}
-            color={"#4F46E5"}
-          />
-        </Pressable>
-      </View>
-    </View>
+    <Post
+    item={item}
+    userId={userId}
+    navigation={navigation}
+    likePost={likePost}
+    unlikePost={unlikePost}
+    />
   );
-
-  //format count
-  const formatCount = (count: number): string => {
-    if (count >= 1_000_000) {
-      return (count / 1_000_000).toFixed(1).replace(/\.0$/, "") + "M";
-    } else if (count >= 1_000) {
-      return (count / 1_000).toFixed(1).replace(/\.0$/, "") + "K";
-    } else {
-      return count.toString();
-    }
-  };
 
   if (loading)
     return (
@@ -273,7 +178,7 @@ const HomeScreen = ({ navigation }: any) => {
         <ActivityIndicator
           size={"large"}
           color={"#4F46E5"}
-          style={{ marginTop: 100 }}
+          style={{ marginTop: hp(13.2) }}
         />
       </View>
     );
@@ -323,8 +228,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffffff",
   },
   header: {
-    padding: "4%",
-    paddingTop: "12%",
+    padding: hp(2),
+    paddingTop: hp(6),
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
@@ -332,78 +237,23 @@ const styles = StyleSheet.create({
   logo: {
     fontFamily: "DancingScriptBold",
     color: "#4F46E5",
-    fontSize: 26,
+    fontSize: rf(3.3),
     letterSpacing: 6,
   },
   avatar: {
-    width: 45,
-    height: 45,
+    width: wp(12.5),
+    height: hp(5.96),
     borderWidth: 2,
     borderColor: "#4F46E5",
-    borderRadius: 30,
+    borderRadius: hp(3.97),
   },
   borderLine: {
     height: 1,
     backgroundColor: "#E0E0E0",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
+    shadowOffset: { width: 0, height: hp(0.13) },
     shadowOpacity: 0.08,
-    shadowRadius: 1,
+    shadowRadius: hp(0.13),
     elevation: 1,
-  },
-  card: {
-    borderBottomWidth: 5,
-    borderColor: "#D9D9D9",
-  },
-  userRow: {
-    flexDirection: "row",
-    paddingVertical: 10,
-    paddingHorizontal: 10,
-  },
-  userInfo: {
-    left: "2%",
-    top: "10%",
-  },
-  userName: {
-    fontFamily: "PoppinsMedium",
-    fontSize: 15,
-  },
-  timeStamp: {
-    fontFamily: "PoppinsRegular",
-    fontSize: 13,
-    top: -3,
-  },
-  postSection: {},
-  postText: {
-    fontFamily: "PoppinsRegular",
-    fontSize: 18,
-    paddingHorizontal: 10,
-    paddingVertical: 10,
-    paddingTop: 20,
-  },
-  postImage: {
-    width: imageWidth,
-    height: imageHeight,
-    //borderRadius: 8,
-    marginTop: 8,
-    alignSelf: "center",
-    borderWidth: 1,
-    borderColor: "#D9D9D9",
-  },
-  counter: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingHorizontal: 10,
-    paddingVertical: 20,
-  },
-  counterText: {
-    fontSize: 14,
-    fontFamily: "PoppinsRegular",
-  },
-  Button: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingHorizontal: 10,
-    paddingVertical: 10,
   },
 });
