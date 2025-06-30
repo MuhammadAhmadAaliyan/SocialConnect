@@ -74,8 +74,8 @@ const LoginScreen = ({ navigation }: any) => {
         body: JSON.stringify({ email, password }),
       });
 
-      if(!response.ok){
-        Alert.alert("Error", "Please check your internet connection.");
+      if (!response.ok) {
+        console.log("Response Error", response.status);
         return;
       }
 
@@ -102,6 +102,7 @@ const LoginScreen = ({ navigation }: any) => {
     } catch (e) {
       console.log("Login Error.");
       console.log(e);
+      Alert.alert("Network Error", "No internet connection.");
       setButtonPressed(false);
     }
   };
@@ -111,7 +112,11 @@ const LoginScreen = ({ navigation }: any) => {
       style={{ flex: 1, backgroundColor: "#ffffff" }}
       behavior={Platform.OS === "ios" ? "height" : "padding"}
     >
-      <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+      <ScrollView
+        style={{ flex: 1 }}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
         <SafeAreaView style={styles.container}>
           <View style={styles.logo}>
             <Text style={styles.logoText}>Social Connect</Text>

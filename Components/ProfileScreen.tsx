@@ -258,8 +258,8 @@ const ProfileScreen = ({ navigation }: any) => {
         body: JSON.stringify(updates),
       });
 
-      if (!response.ok) {
-        Alert.alert("Error", "Please check your internet connection.");
+        if (!response.ok) {
+        console.log("Response Error", response.status);
         return;
       }
 
@@ -275,6 +275,7 @@ const ProfileScreen = ({ navigation }: any) => {
     } catch (e) {
       console.log("Upadate failed.");
       console.log(e);
+        Alert.alert("Network Error", "No internet connection.");
     }
   };
 

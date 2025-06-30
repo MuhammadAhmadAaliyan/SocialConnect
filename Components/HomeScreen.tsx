@@ -61,7 +61,6 @@ const HomeScreen = ({ navigation }: any) => {
       ]);
       if (!postResponse.ok || !userResponse.ok) {
         console.log("An error occur while fetching!!");
-        Alert.alert("Error", "Please check your internet connection.");
         return;
       }
 
@@ -121,6 +120,7 @@ const HomeScreen = ({ navigation }: any) => {
         }
       } catch (e) {
         console.log("An error occurred while saving data");
+          Alert.alert("Network Error", "No internet connection.");
       }
     };
 

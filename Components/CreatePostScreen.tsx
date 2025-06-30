@@ -195,10 +195,10 @@ let uploadImagesToCloudinary = async (imageUris: string[]) => {
       body: JSON.stringify(newPost),
     });
 
-    if (!response.ok) {
-      Alert.alert("Error", "Please check your internet connection.");
-      return;
-    }
+       if (!response.ok) {
+        console.log("Response Error", response.status);
+        return;
+      }
 
     if (response.status === 201) {
       console.log("Post created successfully.");
@@ -217,6 +217,7 @@ let uploadImagesToCloudinary = async (imageUris: string[]) => {
   } catch (e) {
     console.log("An error occurred while creating post");
     console.log(e);
+      Alert.alert("Network Error", "No internet connection.");
     setButtonPressed(false);
   }
 };

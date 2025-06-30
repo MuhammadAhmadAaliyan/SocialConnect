@@ -7,6 +7,7 @@ import {
   Image,
   ScrollView,
   ActivityIndicator,
+  Alert
 } from "react-native";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
@@ -55,6 +56,7 @@ const UserInfoScreen = () => {
         setBio(user.bio);
       } catch (e) {
         console.log("An error occurred while fetching user info.");
+          Alert.alert("Network Error", "No internet connection.");
       } finally {
         setLoading(false);
       }

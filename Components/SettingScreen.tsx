@@ -93,7 +93,7 @@ const SettingScreen = ({ navigation }: any) => {
       });
 
       if (!response.ok) {
-        Alert.alert("Error", "Please check your internet connection.");
+        console.log("Response Error", response.status);
         return;
       }
 
@@ -114,6 +114,7 @@ const SettingScreen = ({ navigation }: any) => {
     } catch (e) {
       console.log("Deletion Error");
       console.log(e);
+        Alert.alert("Network Error", "No internet connection.");
       setModalVisible(false);
     }
   };

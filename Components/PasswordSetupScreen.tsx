@@ -21,7 +21,7 @@ import { useRoute } from "@react-navigation/native";
 import {
   responsiveScreenHeight as hp,
   responsiveFontSize as rf,
-} from 'react-native-responsive-dimensions';
+} from "react-native-responsive-dimensions";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -48,7 +48,8 @@ const PasswordSetupScreen = ({ navigation }: any) => {
       .required("Password is Required"),
   });
 
-  const generateId = () => (Date.now().toString(36) + Math.random().toString(36).substring(2));
+  const generateId = () =>
+    Date.now().toString(36) + Math.random().toString(36).substring(2);
 
   //MOCK_API_URL
   const MOCK_API_AUTH_URL =
@@ -73,40 +74,46 @@ const PasswordSetupScreen = ({ navigation }: any) => {
         id: generateId(),
         name: name,
         email: email,
-        password: password
+        password: password,
       };
-      const response = await fetch(MOCK_API_AUTH_URL,{
-        method: 'POST',
+      const response = await fetch(MOCK_API_AUTH_URL, {
+        method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(newUser)
+        body: JSON.stringify(newUser),
       });
 
-      if(!response.ok){
-        Alert.alert("Error", "Please check your internet connection.");
+      if (!response.ok) {
+        console.log("Response Error", response.status);
         return;
       }
 
-      if(response.status == 400){
-        Alert.alert("Alert!", "The email you entered is already registered. Please use another email.");
+      if (response.status == 400) {
+        Alert.alert(
+          "Alert!",
+          "The email you entered is already registered. Please use another email.",
+        );
         setButtonPressed(false);
         return;
-      }else if(response.status == 201){
-        Alert.alert("Success", "Signup Successful. Please use your credentials to login.");
+      } else if (response.status == 201) {
+        Alert.alert(
+          "Success",
+          "Signup Successful. Please use your credentials to login.",
+        );
         setButtonPressed(false);
         navigation.reset({
           index: 0,
           routes: [{ name: "LoginScreen" }],
         });
-
-      }else{
+      } else {
         console.log("Error: ", response.status);
         setButtonPressed(false);
       }
     } catch (e) {
       console.log("Signup Error.");
       console.log(e);
+      Alert.alert("Network Error", "No internet connection.");
       setButtonPressed(false);
     }
   };
@@ -116,7 +123,11 @@ const PasswordSetupScreen = ({ navigation }: any) => {
       style={{ flex: 1, backgroundColor: "#ffffff" }}
       behavior={Platform.OS === "ios" ? "height" : "padding"}
     >
-      <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps={"handled"}>
+      <ScrollView
+        style={{ flex: 1 }}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps={"handled"}
+      >
         <SafeAreaView style={styles.container}>
           <View style={styles.logo}>
             <Text style={styles.logoText}>Social Connect</Text>
@@ -251,7 +262,7 @@ const styles = StyleSheet.create({
     fontFamily: "PoppinsMedium",
     letterSpacing: 6,
     textAlign: "center",
-    paddingBottom: hp(9)
+    paddingBottom: hp(9),
   },
   passwordInput: {
     borderWidth: 1,

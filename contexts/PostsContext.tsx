@@ -49,7 +49,7 @@ export const PostProvider = ({ children }: any) => {
   React.useEffect(() => {
     Socket.connect();
     Socket.on("connect", () => {
-      console.log("🟢 Socket connected:", Socket.id);
+      console.log("Socket connected:", Socket.id);
     });
 
     Socket.on("likeUpdate", ({ postId, likedBy, unlikedBy }) => {

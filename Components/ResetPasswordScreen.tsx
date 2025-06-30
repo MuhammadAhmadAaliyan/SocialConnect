@@ -79,7 +79,7 @@ const ResetPasswordScreen = ({ navigation }: any) => {
       });
 
       if (!response.ok) {
-        Alert.alert("Error", "Please check your internet connection.");
+        console.log("Response Error", response.status);
         return;
       }
 
