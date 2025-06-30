@@ -34,7 +34,7 @@ const ProfileScreen = ({ navigation }: any) => {
     PoppinsRegular: require("../assets/fonts/Poppins-Regular.ttf"),
     PoppinsBold: require("../assets/fonts/Poppins-Bold.ttf"),
   });
-  const [profileImage, setProfileImage] = React.useState<string>();
+  const [profileImage, setProfileImage] = React.useState<any>();
   const [pModalVisible, setPModalVisible] = React.useState(false);
   const [infoModalVisible, setInfoModalVisible] = React.useState(false);
   const [modalType, setModalType] = React.useState("");
@@ -108,10 +108,9 @@ const ProfileScreen = ({ navigation }: any) => {
         setLoadingModalVisible(true);
         const uri = result.assets[0].uri;
         setProfileImage(uri);
-        await AsyncStorage.setItem("@profileImage", uri);
-
+      
         const secureUrl = await uploadImageToCloudnary(uri);
-        await updateProfile({avatar: secureUrl});
+        await updateProfile({ avatar: secureUrl });
         setLoadingModalVisible(false);
       }
     } catch (e) {
@@ -130,7 +129,7 @@ const ProfileScreen = ({ navigation }: any) => {
         Alert.alert("Permission required", "Please allow gallery access.");
       }
 
-      const result:any = await ImagePicker.launchImageLibraryAsync({
+      const result: any = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
         aspect: [1, 1],
@@ -141,49 +140,52 @@ const ProfileScreen = ({ navigation }: any) => {
         setLoadingModalVisible(true);
         const uri = result.assets[0].uri;
         setProfileImage(uri);
-        await AsyncStorage.setItem("@profileImage", uri);
         const secureUrl = await uploadImageToCloudnary(uri);
         console.log(secureUrl);
-        await updateProfile({avatar: secureUrl});
+        await updateProfile({ avatar: secureUrl });
         setLoadingModalVisible(false);
       }
     } catch (e) {
       console.log("An error occurred while choosing image.");
       console.log(e);
+      setLoadingModalVisible(false);
     }
   };
 
   //Upload image to cloudinary
-let uploadImageToCloudnary = async (imageUri: any) => {
-  try{
+  let uploadImageToCloudnary = async (imageUri: any) => {
+    try {
       const data = new FormData();
-        data.append( "file",{
-          uri: imageUri,
-          type: "image/jpeg",
-          name: "postImage.jpeg"
-        } as any);
+      data.append("file", {
+        uri: imageUri,
+        type: "image/jpeg",
+        name: "postImage.jpeg",
+      } as any);
 
-        data.append("upload_preset", "my_uploads");
-        data.append("cloud_name", "dofkcofc1");
+      data.append("upload_preset", "my_uploads");
+      data.append("cloud_name", "dofkcofc1");
 
-    const response = await fetch("https://api.cloudinary.com/v1_1/dofkcofc1/image/upload", {
-      method: "POST",
-      body: data
-    });
+      const response = await fetch(
+        "https://api.cloudinary.com/v1_1/dofkcofc1/image/upload",
+        {
+          method: "POST",
+          body: data,
+        },
+      );
 
-        const result = await response.json();
-    if (result.secure_url) {
-      console.log(result.secure_url);
-      return result.secure_url;
-    } else {
-      console.error("Cloudinary upload failed:", result);
-      return null;
+      const result = await response.json();
+      if (result.secure_url) {
+        console.log(result.secure_url);
+        return result.secure_url;
+      } else {
+        console.error("Cloudinary upload failed:", result);
+        return null;
+      }
+    } catch (e) {
+      console.log("Failed to upload in Cloudinary.");
+      console.log(e);
     }
-  }catch(e){
-    console.log("Failed to upload in Cloudinary.");
-    console.log(e);
-  }
-}
+  };
 
   //Delete profile image function.
   let handleDelete = () => {
@@ -204,7 +206,7 @@ let uploadImageToCloudnary = async (imageUri: any) => {
             try {
               setProfileImage("");
               await AsyncStorage.removeItem("@profileImage");
-              await updateProfile({avatar: ""});
+              await updateProfile({ avatar: "" });
               setLoadingModalVisible(false);
             } catch (e) {
               console.log("An error occurred while deleting");
@@ -222,16 +224,14 @@ let uploadImageToCloudnary = async (imageUri: any) => {
   let saveEdit = async (newName: string, newBio: string) => {
     setLoadingModalVisible(true);
     try {
-      if(modalType == "Name"){
-        setuserName(newName)
-        await AsyncStorage.setItem('@userName', newName);
-        await updateProfile({name: newName});
+      if (modalType == "Name") {
+        setuserName(newName);
+        await updateProfile({ name: newName });
         setLoadingModalVisible(false);
-      }else if(modalType == "Bio"){
-        const bio = newBio? newBio: "";
+      } else if (modalType == "Bio") {
+        const bio = newBio ? newBio : "";
         setBio(bio);
-        await AsyncStorage.setItem('@bio', bio);
-        await updateProfile({bio: bio});
+        await updateProfile({ bio: bio });
         setLoadingModalVisible(false);
       }
     } catch (e) {
@@ -240,14 +240,14 @@ let uploadImageToCloudnary = async (imageUri: any) => {
     }
   };
 
-    //Update Profile function.
+  //Update Profile function.
   let updateProfile = async (updates: {
     name?: string;
     bio?: string;
     avatar?: string;
   }) => {
     try {
-      const userId = await AsyncStorage.getItem('@userId');
+      const userId = await AsyncStorage.getItem("@userId");
       console.log(userId);
 
       const response = await fetch(`${MOCK_API_AUTH_URL}/${userId}`, {
@@ -258,9 +258,17 @@ let uploadImageToCloudnary = async (imageUri: any) => {
         body: JSON.stringify(updates),
       });
 
+      if (!response.ok) {
+        Alert.alert("Error", "Please check your internet connection.");
+        return;
+      }
+
       if (response.status == 200) {
         console.log("Changes update Successfully.");
-        await AsyncStorage.setItem('@shouldRefreshPosts', "true");
+        await AsyncStorage.setItem("@shouldRefreshPosts", "true");
+        await AsyncStorage.setItem("@profileImage", profileImage);
+        await AsyncStorage.setItem("@userName", userName);
+         await AsyncStorage.setItem("@bio", bio);
       } else {
         console.log(response.status);
       }
@@ -438,7 +446,9 @@ let uploadImageToCloudnary = async (imageUri: any) => {
               touched,
             }) => (
               <>
-                <Text style={{ fontSize: rf(2.65), fontFamily: "PoppinsMedium" }}>
+                <Text
+                  style={{ fontSize: rf(2.65), fontFamily: "PoppinsMedium" }}
+                >
                   Edit {modalType}:
                 </Text>
                 {modalType == "Name" && (
@@ -504,18 +514,18 @@ let uploadImageToCloudnary = async (imageUri: any) => {
           </Formik>
         </View>
       </Modal>
-            <Modal
-              isVisible={isLoadingModalVisible}
-              animationIn={"fadeIn"}
-              animationOut={"fadeOut"}
-            >
-              <View style={styles.modalOverlay}>
-                <View style={styles.loadingModalContent}>
-                  <ActivityIndicator size="large" color="#4F46E5" />
-                  <Text style={styles.modalText}>Updating Profile...</Text>
-                </View>
-              </View>
-            </Modal>
+      <Modal
+        isVisible={isLoadingModalVisible}
+        animationIn={"fadeIn"}
+        animationOut={"fadeOut"}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.loadingModalContent}>
+            <ActivityIndicator size="large" color="#4F46E5" />
+            <Text style={styles.modalText}>Updating Profile...</Text>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -560,7 +570,7 @@ const styles = StyleSheet.create({
   },
   profileArea: {
     paddingVertical: hp(2),
-    paddingHorizontal: hp(2)
+    paddingHorizontal: hp(2),
   },
   profileText: {
     fontSize: rf(3.3),
@@ -724,7 +734,7 @@ const styles = StyleSheet.create({
     letterSpacing: 4,
     color: "#ffffff",
   },
-    modalOverlay: {
+  modalOverlay: {
     flex: 1,
     //backgroundColor: "rgba(0,0,0,0.5)",
     justifyContent: "center",

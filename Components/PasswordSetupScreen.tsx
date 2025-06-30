@@ -83,6 +83,11 @@ const PasswordSetupScreen = ({ navigation }: any) => {
         body: JSON.stringify(newUser)
       });
 
+      if(!response.ok){
+        Alert.alert("Error", "Please check your internet connection.");
+        return;
+      }
+
       if(response.status == 400){
         Alert.alert("Alert!", "The email you entered is already registered. Please use another email.");
         setButtonPressed(false);
@@ -102,6 +107,7 @@ const PasswordSetupScreen = ({ navigation }: any) => {
     } catch (e) {
       console.log("Signup Error.");
       console.log(e);
+      setButtonPressed(false);
     }
   };
 

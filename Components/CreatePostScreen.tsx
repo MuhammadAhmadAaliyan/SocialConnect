@@ -183,6 +183,11 @@ const CreatePostScreen = ({ navigation }: any) => {
         body: JSON.stringify(newPost),
       });
 
+      if (!response.ok) {
+        Alert.alert("Error", "Please check your internet connection.");
+        return;
+      }
+
       if (response.status == 201) {
         console.log("Post created Successfully.");
         isNavigating.current = true;
@@ -200,6 +205,7 @@ const CreatePostScreen = ({ navigation }: any) => {
     } catch (e) {
       console.log("An error occurred while creating post");
       console.log(e);
+      setButtonPressed(false);
     }
   };
 
@@ -288,7 +294,9 @@ const CreatePostScreen = ({ navigation }: any) => {
                 onPress={() => selectPicture()}
               >
                 <Ionicons name={"image"} size={rf(2.4)} color={"#4F46E5"} />
-                <Text style={[styles.text, { fontSize: rf(1.7) }]}>Gallery</Text>
+                <Text style={[styles.text, { fontSize: rf(1.7) }]}>
+                  Gallery
+                </Text>
               </Pressable>
               <Pressable
                 style={[styles.imageContainer, styles.imageContainer2]}
@@ -372,7 +380,7 @@ const styles = StyleSheet.create({
     height: hp(5.29),
     borderRadius: hp(2.65),
     borderWidth: 2,
-    borderColor: '#4F46E5'
+    borderColor: "#4F46E5",
   },
   userName: {
     fontFamily: "PoppinsMedium",

@@ -9,6 +9,7 @@ import {
   FlatList,
   ActivityIndicator,
   RefreshControl,
+  Alert
 } from "react-native";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
@@ -60,6 +61,7 @@ const HomeScreen = ({ navigation }: any) => {
       ]);
       if (!postResponse.ok || !userResponse.ok) {
         console.log("An error occur while fetching!!");
+        Alert.alert("Error", "Please check your internet connection.");
         return;
       }
 

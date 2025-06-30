@@ -13,7 +13,8 @@ import {
   TouchableWithoutFeedback,
   Platform,
   Keyboard,
-  Dimensions
+  Dimensions,
+  Alert,
 } from "react-native";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
@@ -39,7 +40,7 @@ const CommentsScreen = () => {
   const route = useRoute();
   const posts = usePosts();
 
-  const { postId } = route.params as { postId: string};
+  const { postId } = route.params as { postId: string };
   const generateId = () =>
     Date.now().toString(36) + Math.random().toString(36).substring(2);
 
@@ -168,7 +169,6 @@ const CommentsScreen = () => {
 
       setUserComment("");
       setComments((prev: any) => [newComment, ...prev]);
-      posts.addComment(postId, newComment)
       console.log(postId);
       const response = await fetch(`${MOCK_API_COMMENT_URL}/${postId}`, {
         method: "POST",
@@ -179,9 +179,14 @@ const CommentsScreen = () => {
           id: newComment.id,
           userId: userId,
           text: newComment.text,
-          timestamp: newComment.timestamp
+          timestamp: newComment.timestamp,
         }),
       });
+
+      if (!response.ok) {
+        Alert.alert("Error", "Please check your internet connection.");
+        return;
+      }
 
       if (response.status == 201) {
         console.log("Comment created Successfully.");
@@ -201,7 +206,9 @@ const CommentsScreen = () => {
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? insets.top + 40: screenHeight * 0.1}
+        keyboardVerticalOffset={
+          Platform.OS === "ios" ? insets.top + 40 : screenHeight * 0.1
+        }
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <View style={{ flex: 1 }}>
@@ -234,7 +241,12 @@ const CommentsScreen = () => {
               )}
             </View>
             <View style={styles.borderLine} />
-            <View style={[styles.userCommentContainer, {height: insets.bottom + 30}]}>
+            <View
+              style={[
+                styles.userCommentContainer,
+                { height: insets.bottom + 30 },
+              ]}
+            >
               <TextInput
                 value={userComment}
                 onChangeText={(text) => setUserComment(text)}

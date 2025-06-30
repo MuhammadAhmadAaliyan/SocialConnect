@@ -10,6 +10,7 @@ import {
   Platform,
   ScrollView,
   ActivityIndicator,
+  Alert,
 } from "react-native";
 import * as SplashScreen from "expo-splash-screen";
 import { useFonts } from "expo-font";
@@ -73,6 +74,11 @@ const LoginScreen = ({ navigation }: any) => {
         body: JSON.stringify({ email, password }),
       });
 
+      if(!response.ok){
+        Alert.alert("Error", "Please check your internet connection.");
+        return;
+      }
+
       if (response.status == 401) {
         setIncorrectUserCredentials("Incorrect email or password.");
         setButtonPressed(false);
@@ -96,6 +102,7 @@ const LoginScreen = ({ navigation }: any) => {
     } catch (e) {
       console.log("Login Error.");
       console.log(e);
+      setButtonPressed(false);
     }
   };
 

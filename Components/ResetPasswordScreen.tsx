@@ -21,7 +21,7 @@ import { useRoute } from "@react-navigation/native";
 import {
   responsiveScreenHeight as hp,
   responsiveFontSize as rf,
-} from 'react-native-responsive-dimensions';
+} from "react-native-responsive-dimensions";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -78,6 +78,11 @@ const ResetPasswordScreen = ({ navigation }: any) => {
         }),
       });
 
+      if (!response.ok) {
+        Alert.alert("Error", "Please check your internet connection.");
+        return;
+      }
+
       if (response.status == 200) {
         Alert.alert(
           "Success",
@@ -99,6 +104,7 @@ const ResetPasswordScreen = ({ navigation }: any) => {
         "Reset Failed",
         "Something went wrong. Please try again later.",
       );
+      setButtonPressed(false);
     }
   };
 
@@ -242,7 +248,7 @@ const styles = StyleSheet.create({
     fontFamily: "PoppinsMedium",
     letterSpacing: 6,
     textAlign: "center",
-    paddingBottom: hp(9)
+    paddingBottom: hp(9),
   },
   passwordInput: {
     borderWidth: 1,

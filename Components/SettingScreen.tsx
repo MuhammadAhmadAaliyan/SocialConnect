@@ -66,7 +66,7 @@ const SettingScreen = ({ navigation }: any) => {
 
   //handle Delete Account
   let handleDelete = () => {
-        Alert.alert(
+    Alert.alert(
       "Delete Account",
       "Are you sure you want to delete your account permanently?",
       [
@@ -78,12 +78,12 @@ const SettingScreen = ({ navigation }: any) => {
         {
           text: "Delete",
           style: "destructive",
-          onPress: () => deleteAccount()
-        }  
+          onPress: () => deleteAccount(),
+        },
       ],
       { cancelable: true },
     );
-  }
+  };
   let deleteAccount = async () => {
     try {
       setModalVisible(true);
@@ -91,6 +91,11 @@ const SettingScreen = ({ navigation }: any) => {
       const response = await fetch(`${MOCK_API_DELETE_URL}/${userId}`, {
         method: "DELETE",
       });
+
+      if (!response.ok) {
+        Alert.alert("Error", "Please check your internet connection.");
+        return;
+      }
 
       if (response.status == 200) {
         console.log("Deletion Successful.");
@@ -109,23 +114,38 @@ const SettingScreen = ({ navigation }: any) => {
     } catch (e) {
       console.log("Deletion Error");
       console.log(e);
+      setModalVisible(false);
     }
   };
   return (
     <SafeAreaView style={styles.container}>
-      <Pressable style={styles.button} onPress={() => {
-        handleLogout();
-        setModalText("Logging out...");
-        }}>
-        <MaterialCommunityIcons name={"logout"} size={rf(3.25)} color={"#4F46E5"} />
+      <Pressable
+        style={styles.button}
+        onPress={() => {
+          handleLogout();
+          setModalText("Logging out...");
+        }}
+      >
+        <MaterialCommunityIcons
+          name={"logout"}
+          size={rf(3.25)}
+          color={"#4F46E5"}
+        />
         <Text style={styles.buttonText}>Log out</Text>
       </Pressable>
       <View style={styles.borderLine} />
-      <Pressable style={styles.button} onPress={() => {
-        handleDelete();
-        setModalText("Deleting Account...");
-        }}>
-        <MaterialCommunityIcons name={"delete"} size={rf(3.25)} color={"#4F46E5"} />
+      <Pressable
+        style={styles.button}
+        onPress={() => {
+          handleDelete();
+          setModalText("Deleting Account...");
+        }}
+      >
+        <MaterialCommunityIcons
+          name={"delete"}
+          size={rf(3.25)}
+          color={"#4F46E5"}
+        />
         <Text style={[styles.buttonText, { color: "red" }]}>
           Delete Account
         </Text>
