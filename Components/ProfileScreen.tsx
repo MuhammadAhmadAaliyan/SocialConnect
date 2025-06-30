@@ -266,9 +266,9 @@ const ProfileScreen = ({ navigation }: any) => {
       if (response.status == 200) {
         console.log("Changes update Successfully.");
         await AsyncStorage.setItem("@shouldRefreshPosts", "true");
-        await AsyncStorage.setItem("@profileImage", profileImage);
-        await AsyncStorage.setItem("@userName", userName);
-         await AsyncStorage.setItem("@bio", bio);
+       if(updates.avatar) await AsyncStorage.setItem("@profileImage", updates.avatar);
+        if(updates.name) await AsyncStorage.setItem("@userName", updates.name);
+         if(updates.bio) await AsyncStorage.setItem("@bio", updates.bio);
       } else {
         console.log(response.status);
       }
