@@ -1,1 +1,2 @@
 This is Social Media app Called Social Connect
+This is a full-featured Social Media App built with a focus on user engagement and simplicity. It includes Sign Up, Login, and Forgot Password functionality to manage user access securely. Users can create posts with text and optionally attach images. Each user has a profile screen displaying their name, bio, and profile picture — all of which can be edited at any time. The app also features a Settings screen, allowing users to log out or permanently delete their account with ease.
