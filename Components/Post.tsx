@@ -13,6 +13,7 @@ import LottieView from "lottie-react-native";import {
   responsiveScreenHeight as hp,
   responsiveFontSize as rf,
 } from 'react-native-responsive-dimensions';
+import Swiper from "react-native-swiper";
 
 //Calculate Image dimension
 const screenWidth = Dimensions.get("window").width;
@@ -71,16 +72,29 @@ const Post = ({ item, userId, navigation, likePost, unlikePost }: any) => {
           </Text>
         </View>
       </View>
-      <View>
-        {item.text ? <Text style={styles.postText}>{item.text}</Text> : null}
-        {typeof item.image === "string" && item.image !== "" ? (
+<View>
+  {item.text ? <Text style={styles.postText}>{item.text}</Text> : null}
+
+  {Array.isArray(item.images) && item.images.length > 0 ? (
+    <Swiper
+      loop={false}
+      dotColor="#ccc"
+      activeDotColor="#4F46E5"
+      style={{ height: imageHeight + hp(6.62) }}
+    >
+      {item.images.map((uri: any, index: any) => (
+        <View key={index} style={{ alignItems: "center", justifyContent: "center" }}>
           <Image
-            source={{ uri: item.image }}
+            source={{ uri }}
             resizeMode="cover"
             style={styles.postImage}
           />
-        ) : null}
-      </View>
+        </View>
+      ))}
+    </Swiper>
+  ) : null}
+</View>
+
       <View style={styles.counter}>
         <View style={{ flexDirection: "row", gap: wp(14.5) }}>
           <Text style={styles.counterText}>

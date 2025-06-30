@@ -23,6 +23,7 @@ import {
   responsiveScreenHeight as hp,
   responsiveFontSize as rf,
 } from "react-native-responsive-dimensions";
+import Swiper from "react-native-swiper";
 
 //Calculate Image dimension
 const screenWidth = Dimensions.get("window").width;
@@ -39,7 +40,7 @@ const CreatePostScreen = ({ navigation }: any) => {
   const [userAvatar, setUserAvatar] = React.useState<string>();
   const [userName, setUserName] = React.useState<string>();
   const [postText, setPostText] = React.useState<any>();
-  const [postImage, setPostImage] = React.useState<string>();
+  const [postImages, setPostImages] = React.useState<string[]>([]);
   const [isButtonPressed, setButtonPressed] = React.useState(false);
   const isNavigating = React.useRef(false);
 
@@ -90,7 +91,7 @@ const CreatePostScreen = ({ navigation }: any) => {
 
       if (!result.canceled) {
         const uri = result.assets[0].uri;
-        setPostImage(uri);
+        setPostImages(uri);
       }
     } catch (e) {
       console.log("An error while taking picture!!");
@@ -110,13 +111,19 @@ const CreatePostScreen = ({ navigation }: any) => {
       const result: any = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
+        allowsMultipleSelection: true,
         aspect: [4, 5],
         quality: 0.7,
       });
 
       if (!result.canceled) {
-        const uri = result.assets[0].uri;
-        setPostImage(uri);
+        const selectedAssets = result.assets;
+        if (selectedAssets.length > 5) {
+          Alert.alert("Alert", "You can only select 5 Images.");
+          return;
+        }
+        const uris = selectedAssets.map((asset: any) => asset.uri);
+        setPostImages(uris);
       }
     } catch (e) {
       console.log("An error occurred while choosing image.");
@@ -125,11 +132,14 @@ const CreatePostScreen = ({ navigation }: any) => {
   };
 
   //Upload image to cloudinary
-  let uploadImageToCloudnary = async (imageUri: any) => {
-    try {
+let uploadImagesToCloudinary = async (imageUris: string[]) => {
+  try {
+    const uploadedUrls: string[] = [];
+
+    for (const uri of imageUris) {
       const data = new FormData();
       data.append("file", {
-        uri: imageUri,
+        uri,
         type: "image/jpeg",
         name: "postImage.jpeg",
       } as any);
@@ -142,72 +152,74 @@ const CreatePostScreen = ({ navigation }: any) => {
         {
           method: "POST",
           body: data,
-        },
+        }
       );
 
       const result = await response.json();
       if (result.secure_url) {
-        console.log(result.secure_url);
-        return result.secure_url;
+        uploadedUrls.push(result.secure_url);
       } else {
-        console.error("Cloudinary upload failed:", result);
-        return null;
+        console.error("Cloudinary upload failed for one image:", result);
       }
-    } catch (e) {
-      console.log("Failed to upload in Cloudinary.");
-      console.log(e);
     }
-  };
+
+    return uploadedUrls;
+  } catch (e) {
+    console.log("Failed to upload images to Cloudinary.");
+    console.log(e);
+    return [];
+  }
+};
 
   //Create post function.
-  let createPost = async () => {
-    try {
-      const userId = await AsyncStorage.getItem("@userId");
+ let createPost = async () => {
+  try {
+    const userId = await AsyncStorage.getItem("@userId");
 
-      let imageUri = "";
-      if (postImage) {
-        imageUri = await uploadImageToCloudnary(postImage);
-      }
+    let imageUrls: string[] = [];
+    if (postImages && postImages.length > 0) {
+      imageUrls = await uploadImagesToCloudinary(postImages);
+    }
 
-      const newPost = {
-        userId,
-        text: postText,
-        image: imageUri,
-      };
+    const newPost = {
+      userId,
+      text: postText,
+      images: imageUrls,
+    };
 
-      const response = await fetch(MOCK_API_POST_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(newPost),
+    const response = await fetch(MOCK_API_POST_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(newPost),
+    });
+
+    if (!response.ok) {
+      Alert.alert("Error", "Please check your internet connection.");
+      return;
+    }
+
+    if (response.status === 201) {
+      console.log("Post created successfully.");
+      isNavigating.current = true;
+      setButtonPressed(false);
+      await AsyncStorage.setItem("@shouldRefreshPosts", "true");
+      navigation.reset({
+        index: 0,
+        routes: [{ name: "Tabs" }],
       });
-
-      if (!response.ok) {
-        Alert.alert("Error", "Please check your internet connection.");
-        return;
-      }
-
-      if (response.status == 201) {
-        console.log("Post created Successfully.");
-        isNavigating.current = true;
-        setButtonPressed(false);
-        await AsyncStorage.setItem("@shouldRefreshPosts", "true");
-        navigation.reset({
-          index: 0,
-          routes: [{ name: "Tabs" }],
-        });
-      } else {
-        console.log("Failed while fetching.");
-        console.log(response.status);
-        setButtonPressed(false);
-      }
-    } catch (e) {
-      console.log("An error occurred while creating post");
-      console.log(e);
+    } else {
+      console.log("Failed while fetching.");
+      console.log(response.status);
       setButtonPressed(false);
     }
-  };
+  } catch (e) {
+    console.log("An error occurred while creating post");
+    console.log(e);
+    setButtonPressed(false);
+  }
+};
 
   //handle delete
   let handleDelete = () => {
@@ -223,7 +235,7 @@ const CreatePostScreen = ({ navigation }: any) => {
         {
           text: "Delete",
           style: "destructive",
-          onPress: () => setPostImage(""),
+          onPress: () => setPostImages([]),
         },
       ],
       { cancelable: true },
@@ -263,37 +275,54 @@ const CreatePostScreen = ({ navigation }: any) => {
         <Text style={{ fontSize: rf(2.2), fontFamily: "PoppinsBold" }}>
           Image (Optional):
         </Text>
-        {postImage ? (
+        {postImages.length > 0 ? (
           <>
-            <Image
-              source={{ uri: postImage }}
-              resizeMode={"cover"}
-              style={styles.postImage}
-            />
+            <Swiper
+              showsPagination={true}
+              loop={false}
+              dotColor="#ccc"
+              activeDotColor="#4F46E5"
+              style={{ height: imageHeight + hp(6.62) }}
+            >
+              {postImages.map((uri, index) => (
+                <View key={index} style={{ alignItems: "center" }}>
+                  <Image
+                    source={{ uri }}
+                    resizeMode="cover"
+                    style={styles.postImage}
+                  />
+                </View>
+              ))}
+            </Swiper>
+
             <Text
               style={{
                 fontSize: rf(2.2),
                 fontFamily: "PoppinsBold",
-                marginTop: hp(5),
+                marginTop: hp(3),
               }}
             >
-              Edit Image:
+              Edit Images:
             </Text>
             <View
-              style={{ flexDirection: "row", justifyContent: "space-between" }}
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                marginBottom: hp(3),
+              }}
             >
               <Pressable
                 style={[styles.imageContainer, styles.imageContainer2]}
-                onPress={() => takingPicture()}
+                onPress={takingPicture}
               >
-                <Ionicons name={"camera"} size={rf(2.4)} color={"#4F46E5"} />
+                <Ionicons name="camera" size={rf(2.4)} color="#4F46E5" />
                 <Text style={[styles.text, { fontSize: rf(1.7) }]}>Camera</Text>
               </Pressable>
               <Pressable
                 style={[styles.imageContainer, styles.imageContainer2]}
-                onPress={() => selectPicture()}
+                onPress={selectPicture}
               >
-                <Ionicons name={"image"} size={rf(2.4)} color={"#4F46E5"} />
+                <Ionicons name="image" size={rf(2.4)} color="#4F46E5" />
                 <Text style={[styles.text, { fontSize: rf(1.7) }]}>
                   Gallery
                 </Text>
@@ -303,9 +332,9 @@ const CreatePostScreen = ({ navigation }: any) => {
                 onPress={handleDelete}
               >
                 <MaterialCommunityIcons
-                  name={"delete"}
+                  name="delete"
                   size={20}
-                  color={"#4F46E5"}
+                  color="#4F46E5"
                 />
                 <Text style={[styles.text, { fontSize: rf(1.7) }]}>Delete</Text>
               </Pressable>
@@ -313,20 +342,18 @@ const CreatePostScreen = ({ navigation }: any) => {
           </>
         ) : (
           <View
-            style={{ flexDirection: "row", justifyContent: "space-around" }}
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-around",
+              marginVertical: hp(3),
+            }}
           >
-            <Pressable
-              style={styles.imageContainer}
-              onPress={() => takingPicture()}
-            >
-              <Ionicons name={"camera"} size={rf(3.42)} color={"#4F46E5"} />
+            <Pressable style={styles.imageContainer} onPress={takingPicture}>
+              <Ionicons name="camera" size={rf(3.42)} color="#4F46E5" />
               <Text style={styles.text}>Camera</Text>
             </Pressable>
-            <Pressable
-              style={styles.imageContainer}
-              onPress={() => selectPicture()}
-            >
-              <Ionicons name={"image"} size={rf(3.42)} color={"#4F46E5"} />
+            <Pressable style={styles.imageContainer} onPress={selectPicture}>
+              <Ionicons name="image" size={rf(3.42)} color="#4F46E5" />
               <Text style={styles.text}>Gallery</Text>
             </Pressable>
           </View>
@@ -334,12 +361,12 @@ const CreatePostScreen = ({ navigation }: any) => {
         <Pressable
           style={[
             styles.sendButton,
-            ((!postText?.trim() && !postImage) || isButtonPressed) && {
+            ((!postText?.trim() && !postImages) || isButtonPressed) && {
               borderColor: "#CCCCCC",
               backgroundColor: "#CCCCCC",
             },
           ]}
-          disabled={(!postText?.trim() && !postImage) || isButtonPressed}
+          disabled={(!postText?.trim() && !postImages) || isButtonPressed}
           onPress={() => {
             createPost();
             setButtonPressed(true);
@@ -352,7 +379,7 @@ const CreatePostScreen = ({ navigation }: any) => {
               name={"send"}
               size={25}
               color={"#ffffff"}
-              style={!postText?.trim() && !postImage && { opacity: 0.6 }}
+              style={!postText?.trim() && !postImages && { opacity: 0.6 }}
             />
           )}
         </Pressable>
