@@ -6,6 +6,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SplashScreen from "expo-splash-screen";
 import { AuthProvider } from "./contexts/AuthContext";
 import { PostProvider } from "./contexts/PostsContext";
+import { ProfileImageProvider } from "./contexts/ProfileImageContext";
 import { useFonts } from "expo-font";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
@@ -20,6 +21,7 @@ import ProfileScreen from "./Components/ProfileScreen";
 import CreatePostScreen from "./Components/CreatePostScreen";
 import UserInfoScreen from "./Components/UserInfoScreen";
 import CommentsScreen from "./Components/CommentsScreen";
+import EditPostScreen from "./Components/EditPostScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -34,7 +36,6 @@ export default function App() {
   });
   const [isAppReady, setIsAppReady] = React.useState(false);
   const [isLoggedIn, setIsLoggedIn] = React.useState<boolean | null>(null);
-
   React.useEffect(() => {
     const prepareApp = async () => {
       try {
@@ -49,6 +50,7 @@ export default function App() {
     prepareApp();
   }, []);
 
+
   const onLayoutRootView = React.useCallback(async () => {
     if ((isAppReady && loaded) || error) {
       await SplashScreen.hideAsync();
@@ -59,6 +61,7 @@ export default function App() {
 
   return (
     <SafeAreaProvider>
+        <ProfileImageProvider>
     <AuthProvider>
       <PostProvider>
         <View style={styles.container} onLayout={onLayoutRootView}>
@@ -98,7 +101,7 @@ export default function App() {
                 component={UserInfoScreen}
                 options={{
                   headerShown: true,
-                  headerTitle: "User Info",
+                  title:"",
                   headerTitleStyle: { fontFamily: "PoppinsMedium" },
                 }}
               />
@@ -111,11 +114,20 @@ export default function App() {
                   headerTitleStyle: { fontFamily: "PoppinsMedium" },
                 }}
               />
+              <Stack.Screen
+              name="EditPostScreen"
+              component={EditPostScreen}
+              options={{
+                headerShown: true,
+                headerTitle: "Edit Post"
+              }}
+              />
             </Stack.Navigator>
           </NavigationContainer>
         </View>
       </PostProvider>
     </AuthProvider>
+        </ProfileImageProvider>
     </SafeAreaProvider>
   );
 }

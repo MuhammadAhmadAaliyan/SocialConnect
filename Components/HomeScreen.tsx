@@ -3,13 +3,11 @@ import {
   SafeAreaView,
   View,
   Text,
-  Pressable,
   StyleSheet,
-  Image,
   FlatList,
   ActivityIndicator,
   RefreshControl,
-  Alert
+  Alert,
 } from "react-native";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
@@ -22,7 +20,7 @@ import {
   responsiveScreenWidth as wp,
   responsiveScreenHeight as hp,
   responsiveFontSize as rf,
-} from 'react-native-responsive-dimensions';
+} from "react-native-responsive-dimensions";
 
 const HomeScreen = ({ navigation }: any) => {
   const [loaded, error] = useFonts({
@@ -31,15 +29,11 @@ const HomeScreen = ({ navigation }: any) => {
     PoppinsRegular: require("../assets/fonts/Poppins-Regular.ttf"),
     PoppinsBold: require("../assets/fonts/Poppins-Bold.ttf"),
   });
-  const [profileImage, setProfileImage] = React.useState<string>();
+
   const [loading, setLoading] = React.useState(true);
   const { posts, setPosts, likePost, unlikePost } = usePosts();
   const [userId, setUserId] = React.useState<string | null>(null);
   const auth = useAuth();
-
-  //MOCK_API_POST_URL
-  const MOCK_API_POST_URL =
-    "https://socialconnect-backend-production.up.railway.app/posts";
 
   //MOCK_API_USER_URL;
   const MOCK_API_USER_URL =
@@ -52,47 +46,83 @@ const HomeScreen = ({ navigation }: any) => {
   }, [loaded, error]);
 
   //fetch Posts from backend.
-  const fetchPosts = async () => {
-    setLoading(true);
-    try {
-      const [postResponse, userResponse] = await Promise.all([
-        fetch(MOCK_API_POST_URL),
-        fetch(MOCK_API_USER_URL),
-      ]);
-      if (!postResponse.ok || !userResponse.ok) {
-        console.log("An error occur while fetching!!");
-        return;
-      }
+const fetchPosts = async () => {
+  if (!auth.user?.user?.id) return;
 
-      const posts = await postResponse.json();
-      const users = await userResponse.json();
+  const userId = auth.user.user.id;
+  setLoading(true);
+  try {
+    let userFollowings: any;
 
-      const mergedResponse = posts
-        .map((post: any) => {
-          const user = users.find((u: any) => u.id == post.userId);
-          return {
-            ...post,
-            user: user || {},
-          };
-        })
-        .sort(
-          (a: any, b: any) =>
-            new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
-        );
-
-      setPosts(mergedResponse);
-      const userId = await AsyncStorage.getItem("@userId");
-      if (userId) setUserId(userId);
-    } catch (e) {
-      console.log("Error fetching posts:", e);
-    } finally {
-      setLoading(false);
+    if (auth.user.user.followings?.length > 0) {
+      userFollowings = auth.user.user.followings;
+    } else {
+      const data = await AsyncStorage.getItem("@userFollowings");
+      userFollowings = data != null ? JSON.parse(data) : [];
     }
-  };
 
-  React.useEffect(() => {
-    fetchPosts();
-  }, []);
+    const hasFollowings = userFollowings.length > 0;
+
+    const postsUrl = hasFollowings
+      ? `https://socialconnect-backend-production.up.railway.app/following-posts/${userId}`
+      : `https://socialconnect-backend-production.up.railway.app/popular-posts`;
+
+    const [postResponse, userResponse] = await Promise.all([
+      fetch(postsUrl),
+      fetch(MOCK_API_USER_URL),
+    ]);
+
+    if (!postResponse.ok || !userResponse.ok) {
+      console.log("Failed to fetch posts or users.");
+      return;
+    }
+
+    const posts = await postResponse.json();
+    const users = await userResponse.json();
+
+    const mergedResponse = posts
+      .map((post: any) => {
+        const user = users.find((u: any) => u.id == post.userId);
+        return {
+          ...post,
+          user: user || {},
+        };
+      })
+      .sort(
+        (a: any, b: any) =>
+          new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+      );
+
+    setPosts(mergedResponse);
+    setUserId(userId);
+  } catch (e) {
+    console.log("Error fetching posts:", e);
+  } finally {
+    setLoading(false);
+  }
+};
+
+React.useEffect(() => {
+  if (auth.user?.user?.id) {
+    setTimeout(() => {
+      fetchPosts();
+    }, 100); // small delay
+  }
+}, [auth.user?.user?.id]);
+
+  //Refresh Posts.
+  useFocusEffect(() => {
+      const checkRefresh = async () => {
+        const shouldRefresh = await AsyncStorage.getItem("@shouldRefreshPosts");
+        if (shouldRefresh === "true") {
+          fetchPosts();
+          await AsyncStorage.removeItem("@shouldRefreshPosts");
+        }
+      };
+      checkRefresh();
+    }
+  );
+
 
   //Save data into  memory.
   React.useEffect(() => {
@@ -103,6 +133,8 @@ const HomeScreen = ({ navigation }: any) => {
           const bio = auth.user.user.bio;
           const profileImage = auth.user.user.avatar;
           const userId = auth.user.user.id;
+          const userFollowers = auth.user.user.followers;
+          const userFollowings  = auth.user.user.followings;
 
           if (userName) {
             await AsyncStorage.setItem("@userName", userName);
@@ -117,48 +149,21 @@ const HomeScreen = ({ navigation }: any) => {
             await AsyncStorage.setItem("@userId", userId);
             console.log(userId);
           }
+          if(userFollowers){
+            await AsyncStorage.setItem("@userFollowers", JSON.stringify(userFollowers));
+          }
+          if(userFollowings){
+            await AsyncStorage.setItem("@userFollowings", JSON.stringify(userFollowings));
+          }
         }
       } catch (e) {
         console.log("An error occurred while saving data");
-          Alert.alert("Network Error", "No internet connection.");
+        Alert.alert("Network Error", "No internet connection.");
       }
     };
 
     saveData();
   }, [auth.user]);
-
-  //Refresh Posts when user create new Post.
-  useFocusEffect(
-    React.useCallback(() => {
-      const checkRefresh = async () => {
-        const shouldRefresh = await AsyncStorage.getItem("@shouldRefreshPosts");
-        if (shouldRefresh === "true") {
-          await AsyncStorage.removeItem("@shouldRefreshPosts");
-          fetchPosts();
-        }
-      };
-      checkRefresh();
-    }, []),
-  );
-
-  //Load data from memory.
-  useFocusEffect(() => {
-    let loadData = async () => {
-      try {
-        const profileImage = await AsyncStorage.getItem("@profileImage");
-        if (profileImage) {
-          setProfileImage(profileImage);
-        } else {
-          setProfileImage("");
-        }
-      } catch (e) {
-        console.log("An error occurred while saving data.");
-        console.log(e);
-      }
-    };
-
-    loadData();
-  });
 
   if (!loaded && !error) {
     return null;
@@ -166,11 +171,11 @@ const HomeScreen = ({ navigation }: any) => {
 
   let renderItem = ({ item }: any) => (
     <Post
-    item={item}
-    userId={userId}
-    navigation={navigation}
-    likePost={likePost}
-    unlikePost={unlikePost}
+      item={item}
+      userId={userId}
+      navigation={navigation}
+      likePost={likePost}
+      unlikePost={unlikePost}
     />
   );
 
@@ -189,17 +194,6 @@ const HomeScreen = ({ navigation }: any) => {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.logo}>Social Connect</Text>
-        <Pressable onPress={() => navigation.navigate("ProfileScreen")}>
-          {profileImage ? (
-            <Image source={{ uri: profileImage }} style={styles.avatar} />
-          ) : (
-            <Image
-              source={require("../assets/Default Avatar.jpg")}
-              style={styles.avatar}
-              resizeMode={"contain"}
-            />
-          )}
-        </Pressable>
       </View>
       <View style={styles.borderLine} />
       <FlatList
@@ -217,6 +211,8 @@ const HomeScreen = ({ navigation }: any) => {
           />
         }
         onRefresh={fetchPosts}
+        initialNumToRender={5}
+        maxToRenderPerBatch={5}
       />
     </SafeAreaView>
   );
@@ -232,9 +228,8 @@ const styles = StyleSheet.create({
   header: {
     padding: hp(2),
     paddingTop: hp(6),
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    justifyContent: "center",
+    height: hp(12),
   },
   logo: {
     fontFamily: "DancingScriptBold",
@@ -243,7 +238,7 @@ const styles = StyleSheet.create({
     letterSpacing: 6,
   },
   avatar: {
-    width: wp(12.5),
+    width: hp(5.96),
     height: hp(5.96),
     borderWidth: 2,
     borderColor: "#4F46E5",

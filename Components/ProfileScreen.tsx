@@ -26,6 +26,7 @@ import {
   responsiveScreenHeight as hp,
   responsiveFontSize as rf,
 } from "react-native-responsive-dimensions";
+import { useProfileImage } from "../contexts/ProfileImageContext";
 
 const ProfileScreen = ({ navigation }: any) => {
   const [loaded, error] = useFonts({
@@ -34,13 +35,13 @@ const ProfileScreen = ({ navigation }: any) => {
     PoppinsRegular: require("../assets/fonts/Poppins-Regular.ttf"),
     PoppinsBold: require("../assets/fonts/Poppins-Bold.ttf"),
   });
-  const [profileImage, setProfileImage] = React.useState<any>();
   const [pModalVisible, setPModalVisible] = React.useState(false);
   const [infoModalVisible, setInfoModalVisible] = React.useState(false);
   const [modalType, setModalType] = React.useState("");
   const [userName, setuserName] = React.useState<string>("");
   const [bio, setBio] = React.useState<string>("");
   const [isLoadingModalVisible, setLoadingModalVisible] = React.useState(false);
+  const {profileImage, setProfileImage} = useProfileImage()
 
   //MOCK API URL
   const MOCK_API_AUTH_URL =
@@ -243,7 +244,7 @@ const ProfileScreen = ({ navigation }: any) => {
   //Update Profile function.
   let updateProfile = async (updates: {
     name?: string;
-    bio?: string;
+    bio?: any;
     avatar?: string;
   }) => {
     try {
@@ -268,7 +269,9 @@ const ProfileScreen = ({ navigation }: any) => {
         await AsyncStorage.setItem("@shouldRefreshPosts", "true");
        if(updates.avatar) await AsyncStorage.setItem("@profileImage", updates.avatar);
         if(updates.name) await AsyncStorage.setItem("@userName", updates.name);
-         if(updates.bio) await AsyncStorage.setItem("@bio", updates.bio);
+         if(updates.bio){await AsyncStorage.setItem("@bio", updates.bio)}else{
+          await AsyncStorage.setItem("@bio", "")
+         };
       } else {
         console.log(response.status);
       }
@@ -281,37 +284,10 @@ const ProfileScreen = ({ navigation }: any) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Pressable
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}
-        >
-          <Ionicons name={"arrow-back"} size={rf(2.65)} color={"#ffffff"} />
-        </Pressable>
-        <Text style={styles.logo}>Social Connect</Text>
-        {profileImage ? (
-          <Image source={{ uri: profileImage }} style={styles.avatar} />
-        ) : (
-          <Image
-            source={require("../assets/Default Avatar.jpg")}
-            style={styles.avatar}
-          />
-        )}
-      </View>
-      <View
-        style={{
-          height: 1,
-          backgroundColor: "#E0E0E0",
-          shadowColor: "#000",
-          shadowOffset: { width: 0, height: 1 },
-          shadowOpacity: 0.08,
-          shadowRadius: 1,
-          elevation: 1,
-        }}
-      />
+
       <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
         <View style={styles.profileArea}>
-          <Text style={styles.profileText}>Profile</Text>
+          
           <View style={styles.profileImageContainer}>
             {profileImage ? (
               <Image
@@ -538,37 +514,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#ffffff",
   },
-  header: {
-    paddingVertical: hp(2),
-    paddingHorizontal: wp(2),
-    paddingTop: hp(6),
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  logo: {
-    fontFamily: "DancingScriptBold",
-    color: "#4F46E5",
-    fontSize: rf(3.3),
-    letterSpacing: 6,
-  },
-  backButton: {
-    borderWidth: 1,
-    borderColor: "#4F46E5",
-    backgroundColor: "#4F46E5",
-    height: hp(5.95),
-    width: wp(12.5),
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: hp(3.97),
-  },
-  avatar: {
-    width: wp(12.5),
-    height: hp(5.95),
-    borderWidth: 2,
-    borderColor: "#4F46E5",
-    borderRadius: hp(3.97),
-  },
   profileArea: {
     paddingVertical: hp(2),
     paddingHorizontal: hp(2),
@@ -584,7 +529,7 @@ const styles = StyleSheet.create({
     marginBottom: hp(6),
   },
   profileImage: {
-    width: wp(38.88),
+    width: hp(18.53),
     height: hp(18.53),
     borderRadius: hp(10),
     borderWidth: 2,
@@ -597,7 +542,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#4F46E5",
     backgroundColor: "#4F46E5",
-    width: wp(12.5),
+    width: hp(5.95),
     height: hp(5.95),
     justifyContent: "center",
     alignItems: "center",

@@ -51,8 +51,7 @@ const SettingScreen = ({ navigation }: any) => {
       setModalVisible(true);
 
       setTimeout(async () => {
-        await AsyncStorage.clear();
-        auth.login(null);
+        auth.logout();
         navigation.reset({
           index: 0,
           routes: [{ name: "LoginScreen" }],

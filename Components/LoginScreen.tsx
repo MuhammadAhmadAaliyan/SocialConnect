@@ -18,6 +18,7 @@ import { Formik } from "formik";
 import * as Yup from "yup";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../contexts/AuthContext";
+import { useProfileImage } from "../contexts/ProfileImageContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   responsiveScreenHeight as hp,
@@ -38,6 +39,7 @@ const LoginScreen = ({ navigation }: any) => {
   const [incorrectUserCredentials, setIncorrectUserCredentials] =
     React.useState("");
   const auth = useAuth();
+  const { setProfileImage } = useProfileImage();
 
   //MOCK_API_URL
   const MOCK_API_AUTH_URL =
@@ -76,22 +78,24 @@ const LoginScreen = ({ navigation }: any) => {
 
       if (!response.ok) {
         console.log("Response Error", response.status);
-        return;
       }
 
       if (response.status == 401) {
         setIncorrectUserCredentials("Incorrect email or password.");
         setButtonPressed(false);
       } else if (response.status == 200) {
+        const data = await response.json();
+        
+        auth.login(data);
+        setProfileImage(data.user.avatar);
+
         setButtonPressed(false);
+
         navigation.reset({
           index: 0,
           routes: [{ name: "Tabs" }],
         });
 
-        const data = await response.json();
-
-        auth.login(data);
         console.log(data);
 
         await AsyncStorage.setItem("@userLoggedIn", "true");
