@@ -23,6 +23,14 @@ type PostType = {
   timestamp: string;
 };
 
+type message = {
+  id: string;
+  text: string;
+  sender: string;
+  receiver: string;
+  timestamp: string;
+};
+
 type PostContextType = {
   posts: PostType[];
   setPosts: React.Dispatch<React.SetStateAction<PostType[]>>;

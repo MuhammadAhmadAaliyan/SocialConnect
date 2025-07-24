@@ -305,6 +305,7 @@ const UserInfoScreen = ({ navigation }: any) => {
                     styles.button,
                     { flexDirection: "row", alignItems: "center", gap: 6 },
                   ]}
+                  onPress={() => navigation.navigate("MessageScreen", {userId: userId})}
                 >
                   <MaterialCommunityIcons
                     name={"chat"}

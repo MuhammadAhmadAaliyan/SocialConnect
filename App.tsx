@@ -22,6 +22,7 @@ import CreatePostScreen from "./Components/CreatePostScreen";
 import UserInfoScreen from "./Components/UserInfoScreen";
 import CommentsScreen from "./Components/CommentsScreen";
 import EditPostScreen from "./Components/EditPostScreen";
+import MessageScreen from "./Components/MessageScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -36,6 +37,7 @@ export default function App() {
   });
   const [isAppReady, setIsAppReady] = React.useState(false);
   const [isLoggedIn, setIsLoggedIn] = React.useState<boolean | null>(null);
+  const [currentUserId, setCurrentUserId] = React.useState<any>();
   React.useEffect(() => {
     const prepareApp = async () => {
       try {
@@ -122,6 +124,7 @@ export default function App() {
                 headerTitle: "Edit Post"
               }}
               />
+              <Stack.Screen name="MessageScreen" component={MessageScreen}/>
             </Stack.Navigator>
           </NavigationContainer>
         </View>
